@@ -9,7 +9,7 @@
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
-
+**/target/*.java
 # Package Files #
 *.jar
 *.war
@@ -91,3 +91,5 @@ hs_err_pid*
 /.idea/libraries/Maven__org_codehaus_mojo_animal_sniffer_annotations_1_18.xml
 /.idea/libraries/Maven__org_conscrypt_conscrypt_openjdk_uber_2_2_1.xml
 /.idea/libraries/Maven__org_hamcrest_hamcrest_core_1_3.xml
+/robustdb-raft/target/**/*.proto
+/robustdb-raft/target/**/*.java
