@@ -93,3 +93,4 @@ hs_err_pid*
 /.idea/libraries/Maven__org_hamcrest_hamcrest_core_1_3.xml
 /robustdb-raft/target/**/*.proto
 /robustdb-raft/target/**/*.java
+/robustdb-raft/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <modules>
+        <module>robustdb-server</module>
+        <module>robustdb-raft</module>
+        <module>robustdb-kv</module>
+    </modules>
+
+
+    <groupId>com.robustdb</groupId>
+    <artifactId>robustdb</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>robustdb</name>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
+        <protobuf.version>3.6.1</protobuf.version>
+        <protoc.version>3.6.1</protoc.version>
+        <grpc.version>1.23.0</grpc.version>
+        <lexus.version>1.2.8-SNAPSHOT</lexus.version>
+        <rocksdb.version>6.5.2</rocksdb.version>
+        <swift.version>1.2.0.5</swift.version>
+        <fasrtlib.commons.version>1.1.21-RELEASE</fasrtlib.commons.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.robustdb</groupId>
+                <artifactId>robustdb-kv</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.robustdb</groupId>
+                <artifactId>robustdb-raft</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.robustdb</groupId>
+                <artifactId>robustdb-server</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.rocksdb</groupId>
+                <artifactId>rocksdbjni</artifactId>
+                <version>${rocksdb.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>1.18.12</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>
