@@ -34,8 +34,7 @@ class ServeOneJabber extends Thread {
             while (true) {
                 String str = in.readLine();
                 if (str.equals("END")) break;
-
-
+                mySqlParser.parseSql(str);
                 System.out.println("Echoing: " + str);
                 out.println(str);
             }

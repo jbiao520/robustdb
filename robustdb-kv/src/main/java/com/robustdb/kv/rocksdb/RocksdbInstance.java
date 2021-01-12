@@ -77,26 +77,26 @@ public class RocksdbInstance {
         return db.newIterator(cfHandleMap.get(cf));
     }
 
-    public void putCfKeyValue(String dbKey, String cf, final byte[] key, final byte[] value) throws RocksDBException {
-        WriteBatch writeBatch = writeBatches.get(dbKey);
+    public void createCF(String dbKey, String cf) throws RocksDBException {
+        RocksDB db = dbInstances.get(dbKey);
         Map<String, ColumnFamilyHandle> cfHandleMap = dbCfHandleMap.get(dbKey);
-        writeBatch.put(cfHandleMap.get(cf), key, value);
+        ColumnFamilyOptions cfOpts = new ColumnFamilyOptions().optimizeUniversalStyleCompaction();
+        db.createColumnFamily(new ColumnFamilyDescriptor(cf.getBytes(), cfOpts));
+    }
+
+    public void putCfKeyValue(String dbKey, String cf, final byte[] key, final byte[] value) throws RocksDBException {
+        RocksDB db = dbInstances.get(dbKey);
+        Map<String, ColumnFamilyHandle> cfHandleMap = dbCfHandleMap.get(dbKey);
+        db.put(cfHandleMap.get(cf), key, value);
     }
 
     public void deleteCfKeyValue(String dbKey, String cf, final byte[] key) throws RocksDBException {
-        WriteBatch writeBatch = writeBatches.get(dbKey);
-        Map<String, ColumnFamilyHandle> cfHandleMap = dbCfHandleMap.get(dbKey);
-        writeBatch.delete(cfHandleMap.get(cf), key);
-    }
-
-
-    public void flushToRocksDB(String dbKey) throws RocksDBException {
         RocksDB db = dbInstances.get(dbKey);
-        WriteBatch writeBatch = writeBatches.get(dbKey);
-        WriteOptions writeOptions = new WriteOptions();
-        writeOptions.setSync(true);
-        db.write(writeOptions, writeBatch);
-        writeBatch.clear();
+        Map<String, ColumnFamilyHandle> cfHandleMap = dbCfHandleMap.get(dbKey);
+        db.delete(cfHandleMap.get(cf), key);
     }
+
+
+
 }
 

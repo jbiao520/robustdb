@@ -1,5 +1,7 @@
 package com.robustdb.server.client;
 
-public interface KVClient {
+import com.robustdb.server.model.TableDef;
 
+public interface KVClient {
+    void createTable(TableDef tableDef);
 }

@@ -14,11 +14,14 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) throws IOException {
+        initKVStore();
+        startServer();
+    }
 
-
+    private static void initKVStore() {
         try {
             RocksdbInstance rocksdbInstance = new RocksdbInstance();
-            List<String> tableNames = new ArrayList<String>();
+            List<String> tableNames = new ArrayList();
             rocksdbInstance.initMetaDataRocksDB();
             RocksIterator rocksIterator = rocksdbInstance.getCfAllValues(KVConstants.META_DATA,KVConstants.META_DB_TABLES);
             for (rocksIterator.seekToFirst(); rocksIterator.isValid(); rocksIterator.next()) {
@@ -29,7 +32,9 @@ public class Main {
         } catch (RocksDBException e) {
             e.printStackTrace();
         }
+    }
 
+    private static void startServer() throws IOException {
         ServerSocket s = new ServerSocket(3060);
         System.out.println("Server Started");
         try {

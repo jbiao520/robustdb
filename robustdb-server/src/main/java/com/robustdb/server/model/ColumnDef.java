@@ -5,14 +5,13 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.List;
-
 @Setter
 @Getter
 @Builder
 @ToString
-public class TableDef {
-    private String rawTableDef;
-    private String tableName;
-    private List<ColumnDef> columnDefList;
+public class ColumnDef {
+    private String dataType;
+    private String table;
+    private String name;
+    private String fullName;
 }
