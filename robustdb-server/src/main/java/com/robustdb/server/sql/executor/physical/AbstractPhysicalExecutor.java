@@ -4,15 +4,15 @@ import com.robustdb.server.model.parser.ParseResult;
 
 public abstract class AbstractPhysicalExecutor {
     protected AbstractPhysicalExecutor nextExecutor;
-    public void setNextExecutor(AbstractPhysicalExecutor sqlExecturot){
-        this.nextExecutor = sqlExecturot;
+    public void setNextExecutor(AbstractPhysicalExecutor sqlExectuor){
+        this.nextExecutor = sqlExectuor;
     }
     public void executePlan(ParseResult parseResult) {
         if (compatible(parseResult)) {
             execute(parseResult);
         }
         if (nextExecutor != null) {
-            nextExecutor.execute(parseResult);
+            nextExecutor.executePlan(parseResult);
         }
     }
 

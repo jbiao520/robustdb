@@ -15,18 +15,12 @@ public class Test {
 //        sql = "SELECT LastName, FirstName, Address, City FROM Persons a, td b WHERE PersonID = 1 and a.id=b.id";
 //        sql = "insert into Persons ( PersonID , LastName , FirstName, Address,City ) values (1,'guo','jianbiao','sunqiao road','shanghai');";
 //        create();
-        select();
+        create();
     }
 
     private static void create() {
-        String sql = "CREATE TABLE Persons (\n" +
-                "    PersonID int,\n" +
-                "    LastName varchar(255),\n" +
-                "    FirstName varchar(255),\n" +
-                "    Address varchar(255),\n" +
-                "    City varchar(255)\n" +
-                ");";
-
+        String sql = "CREATE TABLE Persons ( PersonID int(8), LastName varchar(255), FirstName varchar(255), Address varchar(255), City varchar(255) );";
+        System.out.println(sql);
         String dbType = JdbcConstants.MYSQL.name();
 
         //?????

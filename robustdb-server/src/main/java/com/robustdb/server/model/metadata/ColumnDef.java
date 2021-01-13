@@ -12,6 +12,7 @@ import lombok.ToString;
 public class ColumnDef {
     private String dataType;
     private String table;
+    private String length;
     private String name;
     private String fullName;
 }

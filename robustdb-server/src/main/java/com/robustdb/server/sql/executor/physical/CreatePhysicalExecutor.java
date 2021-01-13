@@ -1,5 +1,7 @@
 package com.robustdb.server.sql.executor.physical;
 
+import com.alibaba.druid.sql.ast.SQLDataType;
+import com.alibaba.druid.sql.ast.expr.SQLIntegerExpr;
 import com.alibaba.druid.sql.ast.statement.SQLColumnDefinition;
 import com.robustdb.server.client.KVClient;
 import com.robustdb.server.client.local.LocalKVClient;
@@ -20,8 +22,12 @@ public class CreatePhysicalExecutor extends AbstractPhysicalExecutor{
         String rawReq = createParseResult.getRawTableDef();
         List<ColumnDef> columnDefs = new ArrayList<>();
         for (SQLColumnDefinition column : createParseResult.getColumns()) {
+            String dataType = column.getDataType().getName();
+            SQLIntegerExpr sqlIntegerExpr = (SQLIntegerExpr)column.getDataType().getArguments().get(0);
+            String length = sqlIntegerExpr.getNumber().toString();
             ColumnDef columnDef = ColumnDef.builder()
-                    .dataType(column.getDataType().getName())
+                    .dataType(dataType)
+                    .length(length)
                     .name(column.getColumnName())
                     .fullName(column.getColumnName())
                     .table(tableName)

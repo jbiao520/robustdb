@@ -6,7 +6,7 @@ public abstract class AbstractSQLParser {
     protected AbstractSQLParser nextParser;
     protected String type;
     public void setNextParser(AbstractSQLParser sqlParser){
-        this.nextParser = nextParser;
+        this.nextParser = sqlParser;
     }
 
     public ParseResult parseSql(String sql){
