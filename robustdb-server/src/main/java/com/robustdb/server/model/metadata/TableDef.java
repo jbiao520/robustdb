@@ -1,4 +1,4 @@
-package com.robustdb.server.model;
+package com.robustdb.server.model.metadata;
 
 import lombok.Builder;
 import lombok.Getter;

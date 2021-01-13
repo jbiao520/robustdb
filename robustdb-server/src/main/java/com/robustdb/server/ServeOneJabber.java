@@ -1,6 +1,6 @@
 package com.robustdb.server;
 
-import com.robustdb.server.sql.MySqlParser;
+import com.robustdb.server.sql.MySqlEngine;
 
 import java.io.*;
 import java.net.Socket;
@@ -29,12 +29,12 @@ class ServeOneJabber extends Thread {
     }
 
     public void run() {
-        MySqlParser mySqlParser = new MySqlParser();
+        MySqlEngine mySqlEngine = new MySqlEngine();
         try {
             while (true) {
                 String str = in.readLine();
                 if (str.equals("END")) break;
-                mySqlParser.parseSql(str);
+                mySqlEngine.executeSql(str);
                 System.out.println("Echoing: " + str);
                 out.println(str);
             }

@@ -26,6 +26,8 @@
         <rocksdb.version>6.5.2</rocksdb.version>
         <slf4j.version>1.7.28</slf4j.version>
         <fasrtlib.commons.version>1.1.21-RELEASE</fasrtlib.commons.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
     <dependencyManagement>
