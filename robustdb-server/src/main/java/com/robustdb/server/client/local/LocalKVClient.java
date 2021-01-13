@@ -7,6 +7,8 @@ import com.robustdb.server.client.KVClient;
 import com.robustdb.server.model.metadata.TableDef;
 import org.rocksdb.RocksDBException;
 
+import java.util.Map;
+
 
 public class LocalKVClient implements KVClient {
     private RocksdbInstance rocksdbInstance = new RocksdbInstance();
@@ -29,5 +31,16 @@ public class LocalKVClient implements KVClient {
         } catch (RocksDBException e) {
             e.printStackTrace();
         }
+    }
+
+    public void insertData(Map<String,String> kvs,String tableName){
+        kvs.forEach((k,v)->{
+            try {
+                rocksdbInstance.putCfKeyValue(KVConstants.DATA_NODE,tableName,k.getBytes(),v.getBytes());
+            } catch (RocksDBException e) {
+                e.printStackTrace();
+            }
+        });
+
     }
 }

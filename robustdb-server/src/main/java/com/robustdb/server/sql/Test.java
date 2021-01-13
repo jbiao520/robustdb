@@ -2,8 +2,10 @@ package com.robustdb.server.sql;
 
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLExpr;
+import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.statement.*;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlCreateTableStatement;
+import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlInsertStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlTableIndex;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlUpdateStatement;
 import com.alibaba.druid.util.JdbcConstants;
@@ -15,7 +17,7 @@ public class Test {
 //        sql = "SELECT LastName, FirstName, Address, City FROM Persons a, td b WHERE PersonID = 1 and a.id=b.id";
 //        sql = "insert into Persons ( PersonID , LastName , FirstName, Address,City ) values (1,'guo','jianbiao','sunqiao road','shanghai');";
 //        create();
-        create();
+        insert();
     }
 
     private static void create() {
@@ -58,6 +60,18 @@ public class Test {
         System.out.println(statement.getTableName().getSimpleName());
         System.out.println(statement.getItems());
         System.out.println(statement.getWhere());
+    }
+
+    private static void insert(){
+        String sql = "INSERT into Persons(PersonID,LastName,FirstName,Address,City) values (1,'Guo','Jianbiao','Sunqiao','Shanghai')";
+        MySqlInsertStatement statement = (MySqlInsertStatement) SQLUtils.parseSingleMysqlStatement(sql);
+        String tableName = statement.getTableName().getSimpleName();
+        List<SQLExpr> columns = statement.getColumns();
+        List<SQLInsertStatement.ValuesClause> values = statement.getValuesList();
+
+        System.out.println(tableName);
+        System.out.println(columns);
+        System.out.println(values);
     }
 
 }

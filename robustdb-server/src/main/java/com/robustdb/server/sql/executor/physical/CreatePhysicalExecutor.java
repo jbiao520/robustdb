@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CreatePhysicalExecutor extends AbstractPhysicalExecutor{
-    KVClient kvClient = new LocalKVClient();
     @Override
     protected void execute(ParseResult parseResult) {
         CreateParseResult createParseResult = (CreateParseResult)parseResult;
