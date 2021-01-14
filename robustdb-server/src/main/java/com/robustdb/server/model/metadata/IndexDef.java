@@ -11,10 +11,7 @@ import java.util.List;
 @Getter
 @Builder
 @ToString
-public class TableDef {
-    private String rawTableDef;
-    private String tableName;
-    private String primaryKey;
-    private List<ColumnDef> columnDefList;
-    private String comment;
+public class IndexDef {
+    private List<ColumnDef> indexColumns;
+    private boolean isUnique;
 }

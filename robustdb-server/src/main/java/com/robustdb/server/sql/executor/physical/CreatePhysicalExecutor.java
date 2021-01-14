@@ -1,10 +1,8 @@
 package com.robustdb.server.sql.executor.physical;
 
-import com.alibaba.druid.sql.ast.SQLDataType;
 import com.alibaba.druid.sql.ast.expr.SQLIntegerExpr;
-import com.alibaba.druid.sql.ast.statement.SQLColumnDefinition;
-import com.robustdb.server.client.KVClient;
-import com.robustdb.server.client.local.LocalKVClient;
+import com.alibaba.druid.sql.ast.statement.*;
+import com.robustdb.server.enums.ConstraintType;
 import com.robustdb.server.model.metadata.ColumnDef;
 import com.robustdb.server.model.metadata.TableDef;
 import com.robustdb.server.model.parser.CreateParseResult;
@@ -20,12 +18,28 @@ public class CreatePhysicalExecutor extends AbstractPhysicalExecutor{
         String tableName = createParseResult.getTableName();
         String rawReq = createParseResult.getRawTableDef();
         List<ColumnDef> columnDefs = new ArrayList<>();
+        String pk = "";
         for (SQLColumnDefinition column : createParseResult.getColumns()) {
             String dataType = column.getDataType().getName();
             SQLIntegerExpr sqlIntegerExpr = (SQLIntegerExpr)column.getDataType().getArguments().get(0);
             String length = sqlIntegerExpr.getNumber().toString();
+            List<SQLColumnConstraint> columnConstraints= column.getConstraints();
+            List<ConstraintType> constraintTypes = new ArrayList<>();
+            for (SQLColumnConstraint columnConstraint : columnConstraints) {
+                if(columnConstraint instanceof SQLColumnPrimaryKey){
+                    constraintTypes.add(ConstraintType.PK);
+                    pk = column.getColumnName();
+                }else if(columnConstraint instanceof SQLColumnUniqueKey){
+                    constraintTypes.add(ConstraintType.UNIQUE);
+                }else if(columnConstraint instanceof SQLNotNullConstraint){
+                    constraintTypes.add(ConstraintType.NOTNULL);
+                }else if(columnConstraint instanceof SQLNullConstraint){
+                    constraintTypes.add(ConstraintType.NULL);
+                }
+            }
             ColumnDef columnDef = ColumnDef.builder()
                     .dataType(dataType)
+                    .constraintTypes(constraintTypes)
                     .length(length)
                     .name(column.getColumnName())
                     .fullName(column.getColumnName())
@@ -37,6 +51,7 @@ public class CreatePhysicalExecutor extends AbstractPhysicalExecutor{
                 .tableName(tableName)
                 .rawTableDef(rawReq)
                 .columnDefList(columnDefs)
+                .primaryKey(pk)
                 .build();
         kvClient.createTableMetaData(tableDef);
         kvClient.createDataTable(tableName);

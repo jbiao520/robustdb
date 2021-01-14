@@ -2,12 +2,14 @@ package com.robustdb.server.sql;
 
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLExpr;
+import com.alibaba.druid.sql.ast.SQLName;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.statement.*;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlCreateTableStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlInsertStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlTableIndex;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlUpdateStatement;
+import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlSchemaStatVisitor;
 import com.alibaba.druid.util.JdbcConstants;
 
 import java.util.List;
@@ -17,11 +19,11 @@ public class Test {
 //        sql = "SELECT LastName, FirstName, Address, City FROM Persons a, td b WHERE PersonID = 1 and a.id=b.id";
 //        sql = "insert into Persons ( PersonID , LastName , FirstName, Address,City ) values (1,'guo','jianbiao','sunqiao road','shanghai');";
 //        create();
-        insert();
+        create();
     }
 
     private static void create() {
-        String sql = "CREATE TABLE Persons ( PersonID int(8), LastName varchar(255), FirstName varchar(255), Address varchar(255), City varchar(255) );";
+        String sql = "CREATE TABLE Persons ( PersonID int(8) PRIMARY KEY, LastName varchar(255) not null, FirstName varchar(255), Address varchar(255), City varchar(255) );";
         System.out.println(sql);
         String dbType = JdbcConstants.MYSQL.name();
 
@@ -34,6 +36,15 @@ public class Test {
         List<SQLColumnDefinition> columns = sqlStatement.getColumnDefinitions();
         for (SQLColumnDefinition column : columns) {
             System.out.println(column.getColumnName()+" "+column.getDataType());
+
+            if(column.getConstraints().size()>0){
+                SQLColumnConstraint sqlColumnConstraint = column.getConstraints().get(0);
+                System.out.println(sqlColumnConstraint instanceof SQLColumnPrimaryKey);
+                System.out.println(sqlColumnConstraint instanceof SQLColumnUniqueKey);
+                System.out.println(sqlColumnConstraint instanceof SQLNotNullConstraint);
+                System.out.println(sqlColumnConstraint instanceof SQLNullConstraint);
+            }
+
         }
         List<MySqlTableIndex> sqlTableIndices = sqlStatement.getMysqlIndexes();
         System.out.println(sqlTableIndices);
