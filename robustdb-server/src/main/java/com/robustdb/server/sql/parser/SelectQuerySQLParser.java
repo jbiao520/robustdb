@@ -3,9 +3,6 @@ package com.robustdb.server.sql.parser;
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.statement.*;
-import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlInsertStatement;
-import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlStatement;
-import com.robustdb.server.model.parser.InsertParseResult;
 import com.robustdb.server.model.parser.ParseResult;
 import com.robustdb.server.model.parser.SelectParseResult;
 

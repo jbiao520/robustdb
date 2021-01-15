@@ -7,9 +7,9 @@ import com.robustdb.server.model.metadata.ColumnDef;
 import com.robustdb.server.model.metadata.TableDef;
 import com.robustdb.server.model.parser.CreateParseResult;
 import com.robustdb.server.model.parser.ParseResult;
+import com.robustdb.server.sql.def.DefinitionCache;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class CreatePhysicalExecutor extends AbstractPhysicalExecutor{
     @Override
@@ -17,7 +17,8 @@ public class CreatePhysicalExecutor extends AbstractPhysicalExecutor{
         CreateParseResult createParseResult = (CreateParseResult)parseResult;
         String tableName = createParseResult.getTableName();
         String rawReq = createParseResult.getRawTableDef();
-        List<ColumnDef> columnDefs = new ArrayList<>();
+//        List<ColumnDef> columnDefs = new ArrayList<>();
+        Map<String, ColumnDef> columnDefMap = new LinkedHashMap<>();
         String pk = "";
         for (SQLColumnDefinition column : createParseResult.getColumns()) {
             String dataType = column.getDataType().getName();
@@ -45,16 +46,18 @@ public class CreatePhysicalExecutor extends AbstractPhysicalExecutor{
                     .fullName(column.getColumnName())
                     .table(tableName)
                     .build();
-            columnDefs.add(columnDef);
+            columnDefMap.put(column.getColumnName(),columnDef);
         }
         TableDef tableDef = TableDef.builder()
                 .tableName(tableName)
                 .rawTableDef(rawReq)
-                .columnDefList(columnDefs)
+                .columnDefMap(columnDefMap)
                 .primaryKey(pk)
+                .isIndexTable(false)
                 .build();
         kvClient.createTableMetaData(tableDef);
         kvClient.createDataTable(tableName);
+        DefinitionCache.addTableDef(tableName,tableDef);
     }
 
     @Override

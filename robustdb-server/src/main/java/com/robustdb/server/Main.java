@@ -1,8 +1,11 @@
 package com.robustdb.server;
 
 
+import com.google.gson.Gson;
 import com.robustdb.kv.constants.KVConstants;
 import com.robustdb.kv.rocksdb.RocksdbInstance;
+import com.robustdb.server.model.metadata.TableDef;
+import com.robustdb.server.sql.def.DefinitionCache;
 import org.rocksdb.RocksDBException;
 import org.rocksdb.RocksIterator;
 
@@ -25,9 +28,17 @@ public class Main {
             rocksdbInstance.initMetaDataRocksDB();
             RocksIterator rocksIterator = rocksdbInstance.getCfAllValues(KVConstants.META_DATA,KVConstants.META_DB_TABLES);
             for (rocksIterator.seekToFirst(); rocksIterator.isValid(); rocksIterator.next()) {
-                String key = new String(rocksIterator.key());
-                tableNames.add(key);
+                String tableName = new String(rocksIterator.key());
+                TableDef tableDef = new Gson().fromJson(new String(rocksIterator.value()),TableDef.class);
+                tableNames.add(tableName);
+                if(tableDef.isIndexTable()){
+                    String rawTableName = tableName.split("_")[0];
+                    DefinitionCache.addIndexTableDef(rawTableName,tableDef);
+                }else{
+                    DefinitionCache.addTableDef(tableName,tableDef);
+                }
             }
+            DefinitionCache.dumpCaches();
             rocksdbInstance.initDataNodeRocksDB(tableNames);
         } catch (RocksDBException e) {
             e.printStackTrace();

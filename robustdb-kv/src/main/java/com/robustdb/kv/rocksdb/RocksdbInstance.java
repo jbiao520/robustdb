@@ -81,7 +81,8 @@ public class RocksdbInstance {
         RocksDB db = dbInstances.get(dbKey);
         Map<String, ColumnFamilyHandle> cfHandleMap = dbCfHandleMap.get(dbKey);
         ColumnFamilyOptions cfOpts = new ColumnFamilyOptions().optimizeUniversalStyleCompaction();
-        db.createColumnFamily(new ColumnFamilyDescriptor(cf.getBytes(), cfOpts));
+        ColumnFamilyHandle columnFamilyHandle = db.createColumnFamily(new ColumnFamilyDescriptor(cf.getBytes(), cfOpts));
+        cfHandleMap.put(cf,columnFamilyHandle);
     }
 
     public void putCfKeyValue(String dbKey, String cf, final byte[] key, final byte[] value) throws RocksDBException {

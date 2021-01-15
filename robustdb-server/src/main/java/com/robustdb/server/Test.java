@@ -1,14 +1,17 @@
-package com.robustdb.server.sql;
+package com.robustdb.server;
 
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLExpr;
+import com.alibaba.druid.sql.ast.SQLIndexDefinition;
 import com.alibaba.druid.sql.ast.SQLName;
+import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.statement.*;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlCreateTableStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlInsertStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlTableIndex;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlUpdateStatement;
+import com.alibaba.druid.sql.dialect.mysql.parser.MySqlStatementParser;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlSchemaStatVisitor;
 import com.alibaba.druid.util.JdbcConstants;
 
@@ -19,7 +22,7 @@ public class Test {
 //        sql = "SELECT LastName, FirstName, Address, City FROM Persons a, td b WHERE PersonID = 1 and a.id=b.id";
 //        sql = "insert into Persons ( PersonID , LastName , FirstName, Address,City ) values (1,'guo','jianbiao','sunqiao road','shanghai');";
 //        create();
-        create();
+        select();
     }
 
     private static void create() {
@@ -51,7 +54,7 @@ public class Test {
     }
 
     private static void select() {
-        String sql = "SELECT LastName, FirstName, Address, City FROM Persons a where Address=1 and City=2 and FirstName=5";
+        String sql = "SELECT LastName, FirstName, Address, City FROM Persons a where Address=1 and FirstName='test'";
         SQLSelectStatement statement = (SQLSelectStatement) SQLUtils.parseSingleMysqlStatement(sql);
         SQLSelect select = statement.getSelect();
         System.out.println(select);
@@ -83,6 +86,42 @@ public class Test {
         System.out.println(tableName);
         System.out.println(columns);
         System.out.println(values);
+    }
+
+    private static void cindex(){
+
+
+
+        String sql = "alter table Persons ADD index ind1(City);";
+//        String sql = "alter table Persons add city VARCHAR(255);";
+        MySqlStatementParser parser = new MySqlStatementParser(sql);
+        SQLStatement statement = parser.parseStatement();
+        SQLAlterTableStatement alter = (SQLAlterTableStatement)statement;
+        for (SQLAlterTableItem item : alter.getItems()) {
+            if (item instanceof SQLAlterTableDropIndex) {
+                SQLAlterTableDropIndex dropIndex = (SQLAlterTableDropIndex) item;
+                System.out.println("drop index： " + dropIndex.getIndexName());
+            } else if (item instanceof SQLAlterTableDropColumnItem){
+                SQLAlterTableDropColumnItem dropColumn = (SQLAlterTableDropColumnItem)item;
+                System.out.println("drop col： " + dropColumn.getColumns());
+            } else if (item instanceof SQLAlterTableAddIndex) {
+                SQLAlterTableAddIndex addIndex = (SQLAlterTableAddIndex) item;
+                if (addIndex.getName() != null) {
+                    String indexName = addIndex.getName().getSimpleName();
+                    System.out.println("new index: " + indexName);
+                    SQLIndexDefinition sqlIndexDefinition = addIndex.getIndexDefinition();
+                    for (SQLSelectOrderByItem column : sqlIndexDefinition.getColumns()) {
+                        SQLIdentifierExpr sqlExpr = (SQLIdentifierExpr)column.getExpr();
+                        System.out.println(sqlExpr.getName());
+                    }
+
+                    System.out.println(sqlIndexDefinition.getName());
+                }
+            } else if (item instanceof SQLAlterTableAddColumn) {
+                SQLAlterTableAddColumn addColumn = (SQLAlterTableAddColumn) item;
+                System.out.println("new col： " + addColumn.getColumns());
+            }
+        }
     }
 
 }

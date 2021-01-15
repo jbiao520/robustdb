@@ -15,15 +15,16 @@ public class MySqlEngine implements SQLEngine {
     }
 
     private static AbstractSQLParser getChainOfParsers() {
-
         AbstractSQLParser createQuerySQLParser = new CreateQuerySQLParser();
         AbstractSQLParser updateQuerySQLParser = new UpdateQuerySQLParser();
         AbstractSQLParser selectQuerySQLParser = new SelectQuerySQLParser();
         AbstractSQLParser insertQuerySQLParser = new InsertQuerySQLParser();
+        AbstractSQLParser alterQuerySQLParser = new AlterQuerySQLParser();
 
         selectQuerySQLParser.setNextParser(updateQuerySQLParser);
         updateQuerySQLParser.setNextParser(insertQuerySQLParser);
         insertQuerySQLParser.setNextParser(createQuerySQLParser);
+        createQuerySQLParser.setNextParser(alterQuerySQLParser);
 
         return selectQuerySQLParser;
     }
@@ -34,11 +35,11 @@ public class MySqlEngine implements SQLEngine {
         AbstractPhysicalExecutor updateQuerySQLExecutor = new UpdatePhysicalExecutor();
         AbstractPhysicalExecutor selectQuerySQLExecutor = new SelectPhysicalExecutor();
         AbstractPhysicalExecutor insertQuerySQLExecutor = new InsertPhysicalExecutor();
-
+        AbstractPhysicalExecutor alterPhysicalExecutor= new AlterPhysicalExecutor();
         selectQuerySQLExecutor.setNextExecutor(updateQuerySQLExecutor);
         updateQuerySQLExecutor.setNextExecutor(insertQuerySQLExecutor);
         insertQuerySQLExecutor.setNextExecutor(createPhysicalExecutor);
-
+        createPhysicalExecutor.setNextExecutor(alterPhysicalExecutor);
         return selectQuerySQLExecutor;
     }
 }

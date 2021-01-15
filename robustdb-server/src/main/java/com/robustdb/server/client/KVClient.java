@@ -10,4 +10,8 @@ public interface KVClient {
     void createDataTable(String tableName);
 
     void insertData(Map<String, String> kvs, String tableName);
+
+    byte[] getDataData(String key, String tableName);
+
+    byte[] getMetaData(String key, String tableName);
 }

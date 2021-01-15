@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.List;
+import java.util.Map;
 
 @Setter
 @Getter
@@ -15,6 +15,8 @@ public class TableDef {
     private String rawTableDef;
     private String tableName;
     private String primaryKey;
-    private List<ColumnDef> columnDefList;
+//    private List<ColumnDef> columnDefList;
+    private Map<String, ColumnDef> columnDefMap;
     private String comment;
+    private boolean isIndexTable;
 }
