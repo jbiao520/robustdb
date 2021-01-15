@@ -6,6 +6,7 @@
 
 # BlueJ files
 *.ctxt
+*.iml
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
@@ -94,3 +95,6 @@ hs_err_pid*
 /robustdb-raft/target/**/*.proto
 /robustdb-raft/target/**/*.java
 /robustdb-raft/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst
+/datanode/
+/metadata/
+/.idea/
