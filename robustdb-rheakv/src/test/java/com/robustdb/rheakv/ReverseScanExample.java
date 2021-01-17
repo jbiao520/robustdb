@@ -19,7 +19,7 @@ package com.robustdb.rheakv;
 import com.alipay.sofa.jraft.rhea.client.RheaKVStore;
 import com.alipay.sofa.jraft.rhea.storage.KVEntry;
 import com.alipay.sofa.jraft.rhea.util.Lists;
-import com.robustdb.rheakv.client.Client;
+import com.robustdb.rheakv.client.RheaKVClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,10 +38,10 @@ public class ReverseScanExample {
     private static final Logger LOG = LoggerFactory.getLogger(ReverseScanExample.class);
 
     public static void main(final String[] args) throws Exception {
-        final Client client = new Client();
-        client.init();
-        scan(client.getRheaKVStore());
-        client.shutdown();
+        final RheaKVClient rheaKVClient = new RheaKVClient();
+        rheaKVClient.init();
+        scan(rheaKVClient.getRheaKVStore());
+        rheaKVClient.shutdown();
     }
 
     @SuppressWarnings("unchecked")

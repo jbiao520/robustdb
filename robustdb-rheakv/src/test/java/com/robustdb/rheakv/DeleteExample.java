@@ -18,7 +18,7 @@ package com.robustdb.rheakv;
 
 import com.alipay.sofa.jraft.rhea.client.FutureHelper;
 import com.alipay.sofa.jraft.rhea.client.RheaKVStore;
-import com.robustdb.rheakv.client.Client;
+import com.robustdb.rheakv.client.RheaKVClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,10 +36,10 @@ public class DeleteExample {
     private static final Logger LOG = LoggerFactory.getLogger(DeleteExample.class);
 
     public static void main(final String[] args) throws Exception {
-        final Client client = new Client();
-        client.init();
-        delete(client.getRheaKVStore());
-        client.shutdown();
+        final RheaKVClient rheaKVClient = new RheaKVClient();
+        rheaKVClient.init();
+        delete(rheaKVClient.getRheaKVStore());
+        rheaKVClient.shutdown();
     }
 
     public static void delete(final RheaKVStore rheaKVStore) {

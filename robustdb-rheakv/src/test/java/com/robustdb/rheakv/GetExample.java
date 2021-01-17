@@ -17,7 +17,7 @@
 package com.robustdb.rheakv;
 
 import com.alipay.sofa.jraft.rhea.client.RheaKVStore;
-import com.robustdb.rheakv.client.Client;
+import com.robustdb.rheakv.client.RheaKVClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,10 +35,10 @@ public class GetExample {
     private static final Logger LOG = LoggerFactory.getLogger(GetExample.class);
 
     public static void main(final String[] args) throws Exception {
-        final Client client = new Client();
-        client.init();
-        get(client.getRheaKVStore());
-        client.shutdown();
+        final RheaKVClient rheaKVClient = new RheaKVClient();
+        rheaKVClient.init();
+        get(rheaKVClient.getRheaKVStore());
+        rheaKVClient.shutdown();
     }
 
     public static void get(final RheaKVStore rheaKVStore) {

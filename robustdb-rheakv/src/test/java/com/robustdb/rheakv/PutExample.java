@@ -20,7 +20,7 @@ import com.alipay.sofa.jraft.rhea.client.FutureHelper;
 import com.alipay.sofa.jraft.rhea.client.RheaKVStore;
 import com.alipay.sofa.jraft.rhea.storage.KVEntry;
 import com.alipay.sofa.jraft.rhea.util.Lists;
-import com.robustdb.rheakv.client.Client;
+import com.robustdb.rheakv.client.RheaKVClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,10 +39,10 @@ public class PutExample {
     private static final Logger LOG = LoggerFactory.getLogger(PutExample.class);
 
     public static void main(final String[] args) throws Exception {
-        final Client client = new Client();
-        client.init();
-        put(client.getRheaKVStore());
-        client.shutdown();
+        final RheaKVClient rheaKVClient = new RheaKVClient();
+        rheaKVClient.init();
+        put(rheaKVClient.getRheaKVStore());
+        rheaKVClient.shutdown();
     }
 
     public static void put(final RheaKVStore rheaKVStore) {

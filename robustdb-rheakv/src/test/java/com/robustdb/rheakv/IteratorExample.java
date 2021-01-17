@@ -20,7 +20,7 @@ import com.alipay.sofa.jraft.rhea.client.RheaIterator;
 import com.alipay.sofa.jraft.rhea.client.RheaKVStore;
 import com.alipay.sofa.jraft.rhea.storage.KVEntry;
 import com.alipay.sofa.jraft.rhea.util.Lists;
-import com.robustdb.rheakv.client.Client;
+import com.robustdb.rheakv.client.RheaKVClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,10 +38,10 @@ public class IteratorExample {
     private static final Logger LOG = LoggerFactory.getLogger(IteratorExample.class);
 
     public static void main(final String[] args) throws Exception {
-        final Client client = new Client();
-        client.init();
-        iterator(client.getRheaKVStore());
-        client.shutdown();
+        final RheaKVClient rheaKVClient = new RheaKVClient();
+        rheaKVClient.init();
+        iterator(rheaKVClient.getRheaKVStore());
+        rheaKVClient.shutdown();
     }
 
     @SuppressWarnings("unchecked")

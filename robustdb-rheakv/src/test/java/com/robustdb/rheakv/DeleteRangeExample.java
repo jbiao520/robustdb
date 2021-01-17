@@ -18,7 +18,7 @@ package com.robustdb.rheakv;
 
 import com.alipay.sofa.jraft.rhea.client.FutureHelper;
 import com.alipay.sofa.jraft.rhea.client.RheaKVStore;
-import com.robustdb.rheakv.client.Client;
+import com.robustdb.rheakv.client.RheaKVClient;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -31,10 +31,10 @@ import static com.alipay.sofa.jraft.util.BytesUtil.writeUtf8;
 public class DeleteRangeExample {
 
     public static void main(final String[] args) throws Exception {
-        final Client client = new Client();
-        client.init();
-        deleteRange(client.getRheaKVStore());
-        client.shutdown();
+        final RheaKVClient rheaKVClient = new RheaKVClient();
+        rheaKVClient.init();
+        deleteRange(rheaKVClient.getRheaKVStore());
+        rheaKVClient.shutdown();
     }
 
     public static void deleteRange(final RheaKVStore rheaKVStore) {

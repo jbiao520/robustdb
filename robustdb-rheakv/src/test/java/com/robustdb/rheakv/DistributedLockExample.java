@@ -19,7 +19,7 @@ package com.robustdb.rheakv;
 import com.alipay.sofa.jraft.rhea.client.RheaKVStore;
 import com.alipay.sofa.jraft.rhea.util.concurrent.DistributedLock;
 import com.alipay.sofa.jraft.util.ExecutorServiceHelper;
-import com.robustdb.rheakv.client.Client;
+import com.robustdb.rheakv.client.RheaKVClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,11 +36,11 @@ public class DistributedLockExample {
     private static final Logger LOG = LoggerFactory.getLogger(DistributedLockExample.class);
 
     public static void main(final String[] args) throws Exception {
-        final Client client = new Client();
-        client.init();
-        lock(client.getRheaKVStore());
-        lockAndAutoKeepLease(client.getRheaKVStore());
-        client.shutdown();
+        final RheaKVClient rheaKVClient = new RheaKVClient();
+        rheaKVClient.init();
+        lock(rheaKVClient.getRheaKVStore());
+        lockAndAutoKeepLease(rheaKVClient.getRheaKVStore());
+        rheaKVClient.shutdown();
     }
 
     public static void lock(final RheaKVStore rheaKVStore) {

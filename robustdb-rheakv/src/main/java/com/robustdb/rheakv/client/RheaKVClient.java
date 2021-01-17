@@ -32,7 +32,7 @@ import java.util.List;
  *
  * @author jiachun.fjc
  */
-public class Client {
+public class RheaKVClient {
 
     private final RheaKVStore rheaKVStore = new DefaultRheaKVStore();
 
