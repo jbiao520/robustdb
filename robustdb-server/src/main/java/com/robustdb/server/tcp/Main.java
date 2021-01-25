@@ -1,4 +1,4 @@
-package com.robustdb.server;
+package com.robustdb.server.tcp;
 
 
 import com.google.gson.Gson;
@@ -46,7 +46,7 @@ public class Main {
     }
 
     private static void startServer() throws IOException {
-        ServerSocket s = new ServerSocket(3060);
+        ServerSocket s = new ServerSocket(3306);
         System.out.println("Server Started");
         try {
             while(true) {

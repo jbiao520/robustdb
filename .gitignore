@@ -10,7 +10,7 @@
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
-**/target/*.java
+**/target/**
 # Package Files #
 *.jar
 *.war
@@ -98,3 +98,4 @@ hs_err_pid*
 /datanode/
 /metadata/
 /.idea/
+/robustdb-raft/target/protoc-plugins/protoc-3.0.2-osx-x86_64.exe
