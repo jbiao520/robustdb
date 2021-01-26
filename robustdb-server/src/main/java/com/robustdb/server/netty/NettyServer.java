@@ -1,5 +1,7 @@
 package com.robustdb.server.netty;
 
+import com.robustdb.server.netty.handlers.AuthServerHandler;
+import com.robustdb.server.netty.handlers.CommandServerHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
@@ -22,15 +24,14 @@ public class NettyServer {
 
             b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
-                    .childHandler(new EchoServerHandler())
+                    .childHandler(new ServerChannelInitializer())
                     .option(ChannelOption.SO_BACKLOG, 128)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
 
             ChannelFuture f = b.bind(DEFAULT_PORT).sync();
-            System.out.println("Server已启动，端口：" + DEFAULT_PORT);
+            System.out.println("Server port:" + DEFAULT_PORT);
             f.channel().closeFuture().sync();
         } finally {
-
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
         }
