@@ -1,20 +1,19 @@
 package com.robustdb.server.netty;
 
-import com.robustdb.server.netty.handlers.AuthServerHandler;
-import com.robustdb.server.netty.handlers.CommandServerHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class NettyServer {
 
     public static int DEFAULT_PORT = 3307;
-
     public static void main(String[] args) throws Exception {
-
+        log.info("Starting netty server");
 
         EventLoopGroup bossGroup = new NioEventLoopGroup(); // boss
         EventLoopGroup workerGroup = new NioEventLoopGroup(); // worker
@@ -29,7 +28,7 @@ public class NettyServer {
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
 
             ChannelFuture f = b.bind(DEFAULT_PORT).sync();
-            System.out.println("Server port:" + DEFAULT_PORT);
+            log.info("Netty server started with port:{}",DEFAULT_PORT);
             f.channel().closeFuture().sync();
         } finally {
             workerGroup.shutdownGracefully();
