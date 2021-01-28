@@ -1,15 +1,20 @@
 package com.robustdb.server.netty.handlers;
 
+import com.robustdb.server.protocol.mysql.MySQLMessage;
 import com.robustdb.server.protocol.mysql.MySQLPacket;
 import com.robustdb.server.protocol.mysql.OkPacket;
+import com.robustdb.server.protocol.response.SelectVariables;
 import com.robustdb.server.util.Capabilities;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import lombok.extern.slf4j.Slf4j;
 
+import java.io.UnsupportedEncodingException;
 
+@Slf4j
 @ChannelHandler.Sharable
 public class CommandServerHandler extends ChannelInboundHandlerAdapter {
 
@@ -30,45 +35,69 @@ public class CommandServerHandler extends ChannelInboundHandlerAdapter {
 	}
 
 	@Override
-	public void channelRead(ChannelHandlerContext ctx, Object obj) {
+	public void channelRead(ChannelHandlerContext ctx, Object obj) throws UnsupportedEncodingException {
+		log.info("Msg received from channel channel:{}", ctx.channel().id());
 		ByteBuf buf = (ByteBuf) obj;
 		byte[] bytes = new byte[buf.readableBytes()];
 
 		buf.readBytes(bytes);
+		ByteBuf bufferOut;
 		switch (bytes[4])
 		{
 			case MySQLPacket.COM_INIT_DB:
+				log.info("Received COM_INIT_DB from channel:{}", ctx.channel().id());
 				break;
 			case MySQLPacket.COM_QUERY:
+				log.info("Received COM_QUERY from channel:{}", ctx.channel().id());
+				MySQLMessage mm = new MySQLMessage(bytes);
+				mm.position(5);
+				String sql = mm.readString("utf-8");
+
+				log.info("Sql content : {}", sql);
+				bufferOut= SelectVariables.execute(sql);
+				ctx.write(bufferOut);
 				break;
 			case MySQLPacket.COM_PING:
+				log.info("Received COM_PING from channel:{}", ctx.channel().id());
+				bufferOut = Unpooled.buffer();
+				bufferOut.writeBytes(OkPacket.OK);
+				ctx.write(bufferOut);
 				break;
 			case MySQLPacket.COM_QUIT:
+				log.info("Received COM_QUIT from channel:{}", ctx.channel().id());
 				break;
 			case MySQLPacket.COM_PROCESS_KILL:
+				log.info("Received COM_PROCESS_KILL from channel:{}", ctx.channel().id());
 				break;
 			case MySQLPacket.COM_STMT_PREPARE:
+				log.info("Received COM_STMT_PREPARE from channel:{}", ctx.channel().id());
 				break;
 			case MySQLPacket.COM_STMT_SEND_LONG_DATA:
+				log.info("Received COM_STMT_SEND_LONG_DATA from channel:{}", ctx.channel().id());
 				break;
 			case MySQLPacket.COM_STMT_RESET:
+				log.info("Received COM_STMT_RESET from channel:{}", ctx.channel().id());
 				break;
 			case MySQLPacket.COM_STMT_EXECUTE:
+				log.info("Received COM_STMT_EXECUTE from channel:{}", ctx.channel().id());
 				break;
 			case MySQLPacket.COM_STMT_CLOSE:
+				log.info("Received COM_STMT_CLOSE from channel:{}", ctx.channel().id());
 				break;
 			case MySQLPacket.COM_HEARTBEAT:
+				log.info("Received COM_HEARTBEAT from channel:{}", ctx.channel().id());
 				break;
 			case MySQLPacket.COM_FIELD_LIST:
+				log.info("Received COM_FIELD_LIST from channel:{}", ctx.channel().id());
 				break;
 			case MySQLPacket.COM_SET_OPTION:
+				log.info("Received COM_SET_OPTION from channel:{}", ctx.channel().id());
 				break;
 			case MySQLPacket.COM_RESET_CONNECTION:
+				log.info("Received COM_RESET_CONNECTION from channel:{}", ctx.channel().id());
 				break;
 			default:
-				ByteBuf bufferOut= Unpooled.buffer();
-				bufferOut.writeBytes(OkPacket.AUTH_OK);
-				ctx.write(bufferOut);
+
 		}
 
 

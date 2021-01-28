@@ -1,4 +1,4 @@
-package com.robustdb.server;
+package com.robustdb.server.tests;
 
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLExpr;
