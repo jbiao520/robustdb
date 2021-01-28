@@ -62,8 +62,7 @@ public class RowDataPacket extends MySQLPacket {
         }
     }
 
-    public ByteBuf write(ByteBuf bb,
-                         boolean writeSocketIfFull) {
+    public ByteBuf write(ByteBuf bb) {
         BufferUtil.writeUB3(bb, calcPacketSize());
         bb.writeByte(packetId);
         for (int i = 0; i < fieldCount; i++) {

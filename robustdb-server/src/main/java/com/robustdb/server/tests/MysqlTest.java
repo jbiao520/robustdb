@@ -20,7 +20,7 @@ public class MysqlTest {
         Connection connection = null;
         try {
             connection = DriverManager
-                    .getConnection("jdbc:mysql://ts1.devvm.com:3307", "jianguo", "_jkil216633");
+                    .getConnection("jdbc:mysql://localhost:3307", "", "");
             System.out.println("SQL Connection to database established!");
 
         } catch (SQLException e) {

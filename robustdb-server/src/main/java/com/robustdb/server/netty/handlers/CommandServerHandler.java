@@ -3,6 +3,7 @@ package com.robustdb.server.netty.handlers;
 import com.robustdb.server.protocol.mysql.MySQLMessage;
 import com.robustdb.server.protocol.mysql.MySQLPacket;
 import com.robustdb.server.protocol.mysql.OkPacket;
+import com.robustdb.server.protocol.response.SelectVariables;
 import com.robustdb.server.util.Capabilities;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -40,6 +41,7 @@ public class CommandServerHandler extends ChannelInboundHandlerAdapter {
 		byte[] bytes = new byte[buf.readableBytes()];
 
 		buf.readBytes(bytes);
+		ByteBuf bufferOut;
 		switch (bytes[4])
 		{
 			case MySQLPacket.COM_INIT_DB:
@@ -50,10 +52,16 @@ public class CommandServerHandler extends ChannelInboundHandlerAdapter {
 				MySQLMessage mm = new MySQLMessage(bytes);
 				mm.position(5);
 				String sql = mm.readString("utf-8");
+
 				log.info("Sql content : {}", sql);
+				bufferOut= SelectVariables.execute(sql);
+				ctx.write(bufferOut);
 				break;
 			case MySQLPacket.COM_PING:
 				log.info("Received COM_PING from channel:{}", ctx.channel().id());
+				bufferOut = Unpooled.buffer();
+				bufferOut.writeBytes(OkPacket.OK);
+				ctx.write(bufferOut);
 				break;
 			case MySQLPacket.COM_QUIT:
 				log.info("Received COM_QUIT from channel:{}", ctx.channel().id());
@@ -89,9 +97,7 @@ public class CommandServerHandler extends ChannelInboundHandlerAdapter {
 				log.info("Received COM_RESET_CONNECTION from channel:{}", ctx.channel().id());
 				break;
 			default:
-				ByteBuf bufferOut= Unpooled.buffer();
-				bufferOut.writeBytes(OkPacket.AUTH_OK);
-				ctx.write(bufferOut);
+
 		}
 
 

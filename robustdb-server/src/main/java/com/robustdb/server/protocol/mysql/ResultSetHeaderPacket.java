@@ -43,10 +43,7 @@ public class ResultSetHeaderPacket extends MySQLPacket {
             this.extra = mm.readLength();
         }
     }
-
-
-    public ByteBuf write() {
-        ByteBuf buffer = Unpooled.buffer();
+    public ByteBuf write(ByteBuf buffer) {
         int size = calcPacketSize();
         BufferUtil.writeUB3(buffer, size);
         buffer.writeByte(packetId);
@@ -55,6 +52,11 @@ public class ResultSetHeaderPacket extends MySQLPacket {
             BufferUtil.writeLength(buffer, extra);
         }
         return buffer;
+    }
+
+    public ByteBuf write() {
+        ByteBuf buffer = Unpooled.buffer();
+        return write(buffer);
     }
 
     @Override
