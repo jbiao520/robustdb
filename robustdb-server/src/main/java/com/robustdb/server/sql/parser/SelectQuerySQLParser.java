@@ -19,7 +19,11 @@ public class SelectQuerySQLParser extends AbstractSQLParser {
         SQLSelect select = statement.getSelect();
         SQLSelectQueryBlock query = (SQLSelectQueryBlock) select.getQuery();
         SQLExprTableSource tableSource = (SQLExprTableSource) query.getFrom();
-        String tableName = tableSource.getExpr().toString();
+        String tableName = "";
+        if(tableSource!=null){
+            tableName = tableSource.getExpr().toString();
+        }
+
         SQLExpr where = query.getWhere();
         List<SQLSelectItem> selectList = query.getSelectList();
 

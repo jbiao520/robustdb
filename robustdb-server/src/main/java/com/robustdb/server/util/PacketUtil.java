@@ -11,11 +11,11 @@ import java.io.UnsupportedEncodingException;
  * @author mycat
  */
 public class PacketUtil {
-    private static final String CODE_PAGE_1252 = "Cp1252";
+    private static final String CODE_PAGE_1252 = "iso-8859-1";
 
     public static final ResultSetHeaderPacket getHeader(int fieldCount) {
         ResultSetHeaderPacket packet = new ResultSetHeaderPacket();
-        packet.packetId = 1;
+        packet.packetId = 0;
         packet.fieldCount = fieldCount;
         return packet;
     }

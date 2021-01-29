@@ -4,6 +4,7 @@ import com.robustdb.server.protocol.mysql.MySQLMessage;
 import com.robustdb.server.protocol.mysql.MySQLPacket;
 import com.robustdb.server.protocol.mysql.OkPacket;
 import com.robustdb.server.protocol.response.SelectVariables;
+import com.robustdb.server.sql.manager.ManagerParse;
 import com.robustdb.server.util.Capabilities;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -13,10 +14,12 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.UnsupportedEncodingException;
+import java.sql.SQLOutput;
+import java.util.Locale;
 
 @Slf4j
 @ChannelHandler.Sharable
-public class CommandServerHandler extends ChannelInboundHandlerAdapter {
+public class QueryCommandServerHandler extends ChannelInboundHandlerAdapter {
 
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -42,6 +45,7 @@ public class CommandServerHandler extends ChannelInboundHandlerAdapter {
 
 		buf.readBytes(bytes);
 		ByteBuf bufferOut;
+
 		switch (bytes[4])
 		{
 			case MySQLPacket.COM_INIT_DB:
@@ -52,10 +56,17 @@ public class CommandServerHandler extends ChannelInboundHandlerAdapter {
 				MySQLMessage mm = new MySQLMessage(bytes);
 				mm.position(5);
 				String sql = mm.readString("utf-8");
+				if(isMgmtSql(sql)){
+					log.info("Mgmt sql detected, Sql content : {}", sql);
+					ctx.fireChannelRead(obj);
+				}else{
+					log.info("Normal sql detected, Sql content : {}", sql);
+					bufferOut= SelectVariables.execute(sql,null);
+					ctx.write(bufferOut);
+					ctx.flush();
+				}
 
-				log.info("Sql content : {}", sql);
-				bufferOut= SelectVariables.execute(sql);
-				ctx.write(bufferOut);
+
 				break;
 			case MySQLPacket.COM_PING:
 				log.info("Received COM_PING from channel:{}", ctx.channel().id());
@@ -97,7 +108,9 @@ public class CommandServerHandler extends ChannelInboundHandlerAdapter {
 				log.info("Received COM_RESET_CONNECTION from channel:{}", ctx.channel().id());
 				break;
 			default:
-
+				log.info("Default received from channel:{}", ctx.channel().id());
+				ctx.fireChannelRead(obj);
+				break;
 		}
 
 
@@ -149,5 +162,28 @@ public class CommandServerHandler extends ChannelInboundHandlerAdapter {
 			flag |= Capabilities.CLIENT_PLUGIN_AUTH;
 		}
 		return flag;
+	}
+
+	private boolean isMgmtSql(String sql){
+		int rs = ManagerParse.parse(sql);
+		switch (rs & 0xff) {
+			case ManagerParse.SELECT:
+			case ManagerParse.SET:
+			case ManagerParse.SHOW:
+			case ManagerParse.SWITCH:
+			case ManagerParse.KILL_CONN:
+			case ManagerParse.OFFLINE:
+			case ManagerParse.ONLINE:
+			case ManagerParse.STOP:
+			case ManagerParse.RELOAD:
+			case ManagerParse.ROLLBACK:
+			case ManagerParse.CLEAR:
+			case ManagerParse.CONFIGFILE:
+			case ManagerParse.LOGFILE:
+			case ManagerParse.ZK:
+				return true;
+			default:
+				return false;
+		}
 	}
 }

@@ -1,14 +1,17 @@
 package com.robustdb.server.protocol.response;
 
 
+import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
 import com.google.common.base.Splitter;
 import com.robustdb.server.protocol.mysql.EOFPacket;
 import com.robustdb.server.protocol.mysql.FieldPacket;
 import com.robustdb.server.protocol.mysql.ResultSetHeaderPacket;
 import com.robustdb.server.protocol.mysql.RowDataPacket;
+import com.robustdb.server.util.CharsetUtil;
 import com.robustdb.server.util.PacketUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import org.checkerframework.checker.units.qual.A;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,23 +26,44 @@ import java.util.Map;
 public final class SelectVariables {
     private static final Logger LOGGER = LoggerFactory.getLogger(SelectVariables.class);
 
+    private static List<String> convertToStr(List<SQLSelectItem> sqlSelectItems) {
+        List<String> strings = new ArrayList<>();
+        for (SQLSelectItem sqlSelectItem : sqlSelectItems) {
+            strings.add(sqlSelectItem.getExpr().toString().toLowerCase());
+        }
+        return strings;
+    }
 
-    public static ByteBuf execute(String sql) {
+    public static ByteBuf execute(String sql, List<SQLSelectItem> sqlSelectItems) {
+        List<String> splitVar;
+        if (sqlSelectItems == null) {
+            String subSql = "";
+            if (sql.contains("SELECT")) {
+                subSql = sql.substring(sql.indexOf("SELECT") + 6);
+            } else if (sql.contains("select")) {
+                subSql = sql.substring(sql.indexOf("select") + 6);
+            }
 
-        String subSql = sql.substring(sql.indexOf("SELECT") + 6);
-        List<String> splitVar = Splitter.on(",").omitEmptyStrings().trimResults().splitToList(subSql);
-        splitVar = convert(splitVar);
+            splitVar = Splitter.on(",").omitEmptyStrings().trimResults().splitToList(subSql);
+            splitVar = convert(splitVar);
+        }else{
+            splitVar = convertToStr(sqlSelectItems);
+        }
         int FIELD_COUNT = splitVar.size();
         ResultSetHeaderPacket header = PacketUtil.getHeader(FIELD_COUNT);
         FieldPacket[] fields = new FieldPacket[FIELD_COUNT];
 
         int i = 0;
-        byte packetId = 1;
+        byte packetId = 0;
         header.packetId = ++packetId;
         for (int i1 = 0, splitVarSize = splitVar.size(); i1 < splitVarSize; i1++) {
             String s = splitVar.get(i1);
-            fields[i] = PacketUtil.getField(s, Fields.FIELD_TYPE_VAR_STRING);
+            int fieldType = types.get(s)==null?Fields.FIELD_TYPE_VAR_STRING:types.get(s);
+            fields[i] = PacketUtil.getField(s, fieldType);
+            fields[i].charsetIndex = CharsetUtil.getIndex(encodes.get(fieldType));
+            fields[i].length = fields[i].calcPacketSize();
             fields[i++].packetId = ++packetId;
+
         }
 
 
@@ -117,12 +141,16 @@ public final class SelectVariables {
         variables.put("@@net_write_timeout", "60");
         variables.put("@@query_cache_size", "0");
         variables.put("@@query_cache_type", "OFF");
-        variables.put("@@sql_mode", "STRICT_TRANS_TABLES");
+        variables.put("@@sql_mode", "ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION");
         variables.put("@@system_time_zone", "CST");
         variables.put("@@time_zone", "SYSTEM");
-        variables.put("@@tx_isolation", "REPEATABLE-READ");
+        variables.put("@@transaction_isolation", "REPEATABLE-READ");
         variables.put("@@wait_timeout", "172800");
         variables.put("@@session.auto_increment_increment", "1");
+        variables.put("@@session.collation_server", "latin1_swedish_ci");
+        variables.put("@@session.collation_connection", "utf8_general_ci");
+        variables.put("@@session.performance_schema", "1");
+        variables.put("@@version_comment", "robust wip");
 
         variables.put("character_set_client", "utf8");
         variables.put("character_set_connection", "utf8");
@@ -137,17 +165,84 @@ public final class SelectVariables {
         variables.put("net_write_timeout", "60");
         variables.put("query_cache_size", "0");
         variables.put("query_cache_type", "OFF");
-        variables.put("sql_mode", "STRICT_TRANS_TABLES");
+        variables.put("sql_mode", "ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION");
         variables.put("system_time_zone", "CST");
         variables.put("time_zone", "SYSTEM");
-        variables.put("tx_isolation", "REPEATABLE-READ");
+        variables.put("transaction_isolation", "REPEATABLE-READ");
         variables.put("wait_timeout", "172800");
         variables.put("auto_increment_increment", "1");
+        variables.put("collation_server", "latin1_swedish_ci");
+        variables.put("collation_connection", "utf8_general_ci");
+        variables.put("performance_schema", "1");
+        variables.put("database()", "robustdb");
+        variables.put("schema()", "robustdb");
+        variables.put("left(user(),instr(concat(user(),'@'),'@')-1)", "robustdb");
+        variables.put("version()", "0.0.1");
+        variables.put("USER()", "jianguo");
+
     }
 
+    private static final Map<String, Integer> types = new HashMap<String, Integer>();
 
-    public static void main(String[] args) {
-        String sql = "SELECT @@session.auto_increment_increment AS auto_increment_increment, @@character_set_client AS character_set_client, @@character_set_connection AS character_set_connection, @@character_set_results AS character_set_results, @@character_set_server AS character_set_server, @@init_connect AS init_connect, @@interactive_timeout AS interactive_timeout, @@license AS license, @@lower_case_table_names AS lower_case_table_names, @@max_allowed_packet AS max_allowed_packet, @@net_buffer_length AS net_buffer_length, @@net_write_timeout AS net_write_timeout, @@query_cache_size AS query_cache_size, @@query_cache_type AS query_cache_type, @@sql_mode AS sql_mode, @@system_time_zone AS system_time_zone, @@time_zone AS time_zone, @@tx_isolation AS tx_isolation, @@wait_timeout AS wait_timeout ";
-        SelectVariables.execute(sql);
+    static {
+        types.put("@@character_set_client", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("@@character_set_connection", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("@@character_set_results", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("@@character_set_server", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("@@init_connect", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("@@interactive_timeout", Fields.FIELD_TYPE_LONGLONG);
+        types.put("@@license", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("@@lower_case_table_names", Fields.FIELD_TYPE_LONGLONG);
+        types.put("@@max_allowed_packet", Fields.FIELD_TYPE_LONGLONG);
+        types.put("@@net_buffer_length", Fields.FIELD_TYPE_LONGLONG);
+        types.put("@@net_write_timeout", Fields.FIELD_TYPE_LONGLONG);
+        types.put("@@query_cache_size", Fields.FIELD_TYPE_LONGLONG);
+        types.put("@@query_cache_type", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("@@sql_mode", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("@@system_time_zone", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("@@time_zone", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("@@transaction_isolation", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("@@wait_timeout", Fields.FIELD_TYPE_LONGLONG);
+        types.put("@@session.auto_increment_increment", Fields.FIELD_TYPE_LONGLONG);
+        types.put("@@session.collation_server", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("@@session.collation_connection", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("@@session.performance_schema", Fields.FIELD_TYPE_LONGLONG);
+        types.put("@@version_comment", Fields.FIELD_TYPE_VAR_STRING);
+
+        types.put("character_set_client", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("character_set_connection", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("character_set_results", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("character_set_server", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("init_connect", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("interactive_timeout", Fields.FIELD_TYPE_LONGLONG);
+        types.put("license", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("lower_case_table_names", Fields.FIELD_TYPE_LONGLONG);
+        types.put("max_allowed_packet", Fields.FIELD_TYPE_LONGLONG);
+        types.put("net_buffer_length", Fields.FIELD_TYPE_LONGLONG);
+        types.put("net_write_timeout", Fields.FIELD_TYPE_LONGLONG);
+        types.put("query_cache_size", Fields.FIELD_TYPE_LONGLONG);
+        types.put("query_cache_type", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("sql_mode", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("system_time_zone", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("time_zone", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("transaction_isolation", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("wait_timeout", Fields.FIELD_TYPE_LONGLONG);
+        types.put("auto_increment_increment", Fields.FIELD_TYPE_LONGLONG);
+        types.put("collation_server", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("collation_connection", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("performance_schema", Fields.FIELD_TYPE_LONGLONG);
+        types.put("database()", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("schema()", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("version()", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("left(user(),instr(concat(user(),'@'),'@')-1)", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("USER()", Fields.FIELD_TYPE_VAR_STRING);
     }
+
+    private static final Map<Integer, String> encodes = new HashMap();
+
+    static {
+        encodes.put(Fields.FIELD_TYPE_VAR_STRING, "utf-8");
+        encodes.put(Fields.FIELD_TYPE_LONGLONG, "iso-8859-1");
+    }
+
 }

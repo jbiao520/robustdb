@@ -75,9 +75,20 @@ public class RowDataPacket extends MySQLPacket {
             else {
 
                 BufferUtil.writeLength(bb, fv.length);
+                writeToBuffer(fv,bb);
             }
         }
         return bb;
+    }
+
+    public void writeToBuffer(byte[] src, ByteBuf buffer) {
+        int offset = 0;
+        int length = src.length;
+        if (length > 0) {
+//                buffer.writeBytes(src, offset, length);
+                buffer.writeBytes(src);
+
+        }
     }
 
     @Override

@@ -10,7 +10,7 @@ public abstract class AbstractSQLParser {
     }
 
     public ParseResult parseSql(String sql){
-        if(sql.startsWith(type)){
+        if(sql.toUpperCase().contains(type)){
             return parse(sql);
         }
         if(nextParser!=null){

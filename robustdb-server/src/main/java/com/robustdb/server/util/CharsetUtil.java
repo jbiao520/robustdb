@@ -24,6 +24,7 @@ public class CharsetUtil {
         INDEX_TO_CHARSET.put(24,"gb2312");
         INDEX_TO_CHARSET.put(33,"utf8");
         INDEX_TO_CHARSET.put(45,"utf8mb4");
+        INDEX_TO_CHARSET.put(63,"iso-8859-1");
 
         String filePath = Thread.currentThread().getContextClassLoader()
                 .getResource("").getPath().replaceAll("%20", " ")
@@ -46,8 +47,8 @@ public class CharsetUtil {
             }
         }
 
-        CHARSET_TO_INDEX.put("iso-8859-1", 14);
-        CHARSET_TO_INDEX.put("iso_8859_1", 14);
+//        CHARSET_TO_INDEX.put("iso-8859-1", 14);
+        CHARSET_TO_INDEX.put("iso-8859-1", 63);
         CHARSET_TO_INDEX.put("utf-8", 33);
     }
 

@@ -1,5 +1,6 @@
 package com.robustdb.server.netty;
 
+import com.robustdb.server.tests.RobustDBTest;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
@@ -29,6 +30,7 @@ public class NettyServer {
 
             ChannelFuture f = b.bind(DEFAULT_PORT).sync();
             log.info("Netty server started with port:{}",DEFAULT_PORT);
+//            RobustDBTest.callrobust();
             f.channel().closeFuture().sync();
         } finally {
             workerGroup.shutdownGracefully();

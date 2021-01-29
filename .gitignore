@@ -99,3 +99,4 @@ hs_err_pid*
 /metadata/
 /.idea/
 /robustdb-raft/target/protoc-plugins/protoc-3.0.2-osx-x86_64.exe
+/robustdb-server/src/main/java/com/robustdb/server/tests/RemoteTest.java
