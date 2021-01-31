@@ -1,12 +1,10 @@
 package com.robustdb.server.netty.handlers;
 
 import com.robustdb.server.protocol.mysql.MySQLMessage;
-import com.robustdb.server.protocol.mysql.MySQLPacket;
 import com.robustdb.server.protocol.mysql.OkPacket;
-import com.robustdb.server.protocol.response.SelectVariables;
-import com.robustdb.server.sql.manager.ManagerParse;
-import com.robustdb.server.sql.manager.SelectHandler;
-import com.robustdb.server.sql.manager.ShowHandler;
+import com.robustdb.server.sql.mycat.manager.ManagerParse;
+import com.robustdb.server.sql.mycat.manager.ManageSelectHandler;
+import com.robustdb.server.sql.mycat.manager.ShowHandler;
 import com.robustdb.server.util.Capabilities;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -51,7 +49,7 @@ public class MgmtCommandServerHandler extends ChannelInboundHandlerAdapter {
 		ByteBuf bufferOut;
 		switch (rs & 0xff) {
 			case ManagerParse.SELECT:
-				bufferOut = SelectHandler.handle(sql, rs >>> SHIFT);
+				bufferOut = ManageSelectHandler.handle(sql, rs >>> SHIFT);
 				ctx.write(bufferOut);
 				break;
 			case ManagerParse.SET:

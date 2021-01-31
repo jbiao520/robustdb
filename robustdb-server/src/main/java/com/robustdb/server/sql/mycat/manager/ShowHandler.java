@@ -1,4 +1,4 @@
-package com.robustdb.server.sql.manager;
+package com.robustdb.server.sql.mycat.manager;
 
 
 import io.netty.buffer.ByteBuf;

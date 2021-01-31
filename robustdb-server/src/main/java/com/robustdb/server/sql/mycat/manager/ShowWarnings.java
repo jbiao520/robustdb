@@ -1,4 +1,4 @@
-package com.robustdb.server.sql.manager;
+package com.robustdb.server.sql.mycat.manager;
 
 import com.robustdb.server.protocol.mysql.EOFPacket;
 import com.robustdb.server.protocol.mysql.FieldPacket;
@@ -10,13 +10,9 @@ import com.robustdb.server.util.StringUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
-import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
+public class ShowWarnings {
 
-public class ShowVariables {
-
-    private static final int FIELD_COUNT = 2;
+    private static final int FIELD_COUNT = 3;
     private static final ResultSetHeaderPacket header = PacketUtil.getHeader(FIELD_COUNT);
     private static final FieldPacket[] fields = new FieldPacket[FIELD_COUNT];
     private static final EOFPacket eof = new EOFPacket();
@@ -25,12 +21,13 @@ public class ShowVariables {
         byte packetId = 0;
         header.packetId = ++packetId;
 
-        fields[i] = PacketUtil.getField("VARIABLE_NAME", Fields.FIELD_TYPE_VAR_STRING);
+        fields[i] = PacketUtil.getField("Level", Fields.FIELD_TYPE_VAR_STRING);
         fields[i++].packetId = ++packetId;
 
-        fields[i] = PacketUtil.getField("VALUE", Fields.FIELD_TYPE_VAR_STRING);
+        fields[i] = PacketUtil.getField("Code", Fields.FIELD_TYPE_VAR_STRING);
         fields[i++].packetId = ++packetId;
-
+        fields[i] = PacketUtil.getField("Message", Fields.FIELD_TYPE_VAR_STRING);
+        fields[i++].packetId = ++packetId;
         eof.packetId = ++packetId;
     }
 
@@ -50,11 +47,11 @@ public class ShowVariables {
 
         // write rows
         byte packetId = eof.packetId;
-        for (Map.Entry<String, String> e : variables.entrySet()) {
-            RowDataPacket row = getRow(e.getKey(), e.getValue(), "utf-8");
-            row.packetId = ++packetId;
-            buffer = row.write(buffer);
-        }
+//        for (Map.Entry<String, String> e : variables.entrySet()) {
+//            RowDataPacket row = getRow(e.getKey(), e.getValue(), "utf-8");
+//            row.packetId = ++packetId;
+//            buffer = row.write(buffer);
+//        }
 
         // write lastEof
         EOFPacket lastEof = new EOFPacket();
@@ -72,25 +69,5 @@ public class ShowVariables {
         return row;
     }
 
-    private static final Map<String, String> variables = new HashMap<String, String>();
-    static {
-        variables.put("character_set_client", "utf8");
-        variables.put("character_set_connection", "utf8");
-        variables.put("character_set_results", "utf8");
-        variables.put("character_set_server", "utf8");
-        variables.put("init_connect", "");
-        variables.put("interactive_timeout", "172800");
-        variables.put("lower_case_table_names", "1");
-        variables.put("max_allowed_packet", "16777216");
-        variables.put("net_buffer_length", "8192");
-        variables.put("net_write_timeout", "60");
-        variables.put("query_cache_size", "0");
-        variables.put("query_cache_type", "OFF");
-        variables.put("sql_mode", "STRICT_TRANS_TABLES");
-        variables.put("system_time_zone", "CST");
-        variables.put("time_zone", "SYSTEM");
-        variables.put("lower_case_table_names", "1");
-        variables.put("tx_isolation", "REPEATABLE-READ");
-        variables.put("wait_timeout", "172800");
-    }
+
 }

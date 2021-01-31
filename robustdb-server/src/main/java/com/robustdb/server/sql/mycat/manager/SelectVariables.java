@@ -1,4 +1,4 @@
-package com.robustdb.server.protocol.response;
+package com.robustdb.server.sql.mycat.manager;
 
 
 import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
@@ -7,11 +7,11 @@ import com.robustdb.server.protocol.mysql.EOFPacket;
 import com.robustdb.server.protocol.mysql.FieldPacket;
 import com.robustdb.server.protocol.mysql.ResultSetHeaderPacket;
 import com.robustdb.server.protocol.mysql.RowDataPacket;
+import com.robustdb.server.protocol.response.Fields;
 import com.robustdb.server.util.CharsetUtil;
 import com.robustdb.server.util.PacketUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import org.checkerframework.checker.units.qual.A;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +58,7 @@ public final class SelectVariables {
         header.packetId = ++packetId;
         for (int i1 = 0, splitVarSize = splitVar.size(); i1 < splitVarSize; i1++) {
             String s = splitVar.get(i1);
-            int fieldType = types.get(s)==null?Fields.FIELD_TYPE_VAR_STRING:types.get(s);
+            int fieldType = types.get(s)==null? Fields.FIELD_TYPE_VAR_STRING:types.get(s);
             fields[i] = PacketUtil.getField(s, fieldType);
             fields[i].charsetIndex = CharsetUtil.getIndex(encodes.get(fieldType));
             fields[i].length = fields[i].calcPacketSize();

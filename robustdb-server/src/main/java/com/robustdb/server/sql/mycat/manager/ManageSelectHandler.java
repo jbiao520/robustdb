@@ -1,19 +1,19 @@
-package com.robustdb.server.sql.manager;
+package com.robustdb.server.sql.mycat.manager;
 
 import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
+import com.alibaba.druid.util.StringUtils;
 import com.robustdb.server.model.parser.SelectParseResult;
-import com.robustdb.server.protocol.response.SelectVariables;
 import com.robustdb.server.sql.parser.SelectQuerySQLParser;
 import io.netty.buffer.ByteBuf;
 
 import java.util.List;
 
-import static com.robustdb.server.sql.manager.ManagerParseSelect.*;
+import static com.robustdb.server.sql.mycat.manager.ManagerParseSelect.*;
 
 /**
  * @author mycat
  */
-public final class SelectHandler {
+public final class ManageSelectHandler {
 
     public static ByteBuf handle(String stmt, int offset) {
         ByteBuf buf;
@@ -42,6 +42,12 @@ public final class SelectHandler {
                 break;
         }
         return buf;
+    }
+
+    public static boolean isMgmtSelect(String sql){
+        SelectQuerySQLParser selectQuerySQLParser = new SelectQuerySQLParser();
+        SelectParseResult selectParseResult = (SelectParseResult) selectQuerySQLParser.parseSql(sql);
+        return StringUtils.isEmpty(selectParseResult.getTableName());
     }
 
 }

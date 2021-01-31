@@ -2,6 +2,7 @@ package com.robustdb.server.util;
 
 
 import com.robustdb.server.protocol.mysql.BinaryPacket;
+import com.robustdb.server.protocol.mysql.ErrorPacket;
 import com.robustdb.server.protocol.mysql.FieldPacket;
 import com.robustdb.server.protocol.mysql.ResultSetHeaderPacket;
 

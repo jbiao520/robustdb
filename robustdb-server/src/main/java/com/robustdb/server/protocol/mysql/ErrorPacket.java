@@ -1,9 +1,10 @@
-package com.robustdb.server.util;
+package com.robustdb.server.protocol.mysql;
 
 
 import com.robustdb.server.protocol.mysql.BinaryPacket;
 import com.robustdb.server.protocol.mysql.MySQLMessage;
 import com.robustdb.server.protocol.mysql.MySQLPacket;
+import com.robustdb.server.util.BufferUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
