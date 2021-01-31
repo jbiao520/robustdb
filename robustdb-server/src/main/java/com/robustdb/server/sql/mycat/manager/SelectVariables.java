@@ -151,6 +151,10 @@ public final class SelectVariables {
         variables.put("@@session.collation_connection", "utf8_general_ci");
         variables.put("@@session.performance_schema", "1");
         variables.put("@@version_comment", "robust wip");
+        variables.put("@@session.tx_isolation", "REPEATABLE-READ");
+        variables.put("@@session.tx_read_only", "0");
+
+
 
         variables.put("character_set_client", "utf8");
         variables.put("character_set_connection", "utf8");
@@ -207,7 +211,9 @@ public final class SelectVariables {
         types.put("@@session.collation_server", Fields.FIELD_TYPE_VAR_STRING);
         types.put("@@session.collation_connection", Fields.FIELD_TYPE_VAR_STRING);
         types.put("@@session.performance_schema", Fields.FIELD_TYPE_LONGLONG);
+        types.put("@@session.tx_isolation", Fields.FIELD_TYPE_VAR_STRING);
         types.put("@@version_comment", Fields.FIELD_TYPE_VAR_STRING);
+        types.put("@@session.tx_read_only", Fields.FIELD_TYPE_LONG);
 
         types.put("character_set_client", Fields.FIELD_TYPE_VAR_STRING);
         types.put("character_set_connection", Fields.FIELD_TYPE_VAR_STRING);

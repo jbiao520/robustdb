@@ -38,54 +38,60 @@ public class MgmtCommandServerHandler extends ChannelInboundHandlerAdapter {
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object obj) throws UnsupportedEncodingException {
 		log.info("Msg received from channel channel:{}", ctx.channel().id());
-		ByteBuf buf = (ByteBuf) obj;
-		buf.resetReaderIndex();
-		byte[] bytes = new byte[buf.readableBytes()];
-		buf.readBytes(bytes);
-		MySQLMessage mm = new MySQLMessage(bytes);
-		mm.position(5);
-		String sql = mm.readString("utf-8");
-		int rs = ManagerParse.parse(sql);
-		ByteBuf bufferOut;
-		switch (rs & 0xff) {
-			case ManagerParse.SELECT:
-				bufferOut = ManageSelectHandler.handle(sql, rs >>> SHIFT);
-				ctx.write(bufferOut);
-				break;
-			case ManagerParse.SET:
-				log.info("Received ManagerParse.SET from channel:{}", ctx.channel().id());
-				bufferOut = Unpooled.buffer();
-				bufferOut.writeBytes(OkPacket.OK);
-				ctx.write(bufferOut);
-				break;
-			case ManagerParse.SHOW:
-				bufferOut = ShowHandler.handle(sql, rs >>> SHIFT);
-				ctx.write(bufferOut);
-				break;
-			case ManagerParse.SWITCH:
-				break;
-			case ManagerParse.KILL_CONN:
-				break;
-			case ManagerParse.OFFLINE:
-				break;
-			case ManagerParse.ONLINE:
-				break;
-			case ManagerParse.STOP:
-				break;
-			case ManagerParse.RELOAD:
-				break;
-			case ManagerParse.ROLLBACK:
-				break;
-			case ManagerParse.CLEAR:
-				break;
-			case ManagerParse.CONFIGFILE:
-				break;
-			case ManagerParse.LOGFILE:
-				break;
-			case ManagerParse.ZK:
-				break;
-			default:
+		try{
+			ByteBuf buf = (ByteBuf) obj;
+			buf.resetReaderIndex();
+			byte[] bytes = new byte[buf.readableBytes()];
+			buf.readBytes(bytes);
+			MySQLMessage mm = new MySQLMessage(bytes);
+			mm.position(5);
+			String sql = mm.readString("utf-8");
+			int rs = ManagerParse.parse(sql);
+			ByteBuf bufferOut;
+			int x = rs & 0xff;
+			switch (x) {
+				case ManagerParse.SELECT:
+					bufferOut = ManageSelectHandler.handle(sql, rs >>> SHIFT);
+					ctx.write(bufferOut);
+					break;
+				case ManagerParse.SET:
+					log.info("Received ManagerParse.SET from channel:{}", ctx.channel().id());
+					bufferOut = Unpooled.buffer();
+					bufferOut.writeBytes(OkPacket.OK);
+					ctx.write(bufferOut);
+					break;
+				case ManagerParse.SHOW:
+					bufferOut = ShowHandler.handle(sql, rs >>> SHIFT);
+					ctx.write(bufferOut);
+					break;
+				case ManagerParse.SWITCH:
+					break;
+				case ManagerParse.KILL_CONN:
+					break;
+				case ManagerParse.OFFLINE:
+					break;
+				case ManagerParse.ONLINE:
+					break;
+				case ManagerParse.STOP:
+					break;
+				case ManagerParse.RELOAD:
+					break;
+				case ManagerParse.ROLLBACK:
+					break;
+				case ManagerParse.CLEAR:
+					break;
+				case ManagerParse.CONFIGFILE:
+					break;
+				case ManagerParse.LOGFILE:
+					break;
+				case ManagerParse.ZK:
+					break;
+				default:
+			}
+		}catch(Exception e){
+			log.error("Unexpected error:{}",e);
 		}
+
 
 
 	}

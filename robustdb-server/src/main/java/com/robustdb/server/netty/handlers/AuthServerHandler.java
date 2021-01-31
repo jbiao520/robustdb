@@ -67,7 +67,7 @@ public class AuthServerHandler extends ChannelInboundHandlerAdapter {
             ByteBuf buf = (ByteBuf) obj;
             byte[] bytes = new byte[buf.readableBytes()];
             buf.readBytes(bytes);
-            System.out.println(bytes[4]);
+            int state = bytes[4];
             AuthPacket msg = new AuthPacket();
             msg.read(bytes);
             ByteBuf bufferOut = Unpooled.buffer();
