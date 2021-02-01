@@ -1,6 +1,7 @@
 package com.robustdb.server.sql;
 
 import com.robustdb.server.model.parser.ParseResult;
+import com.robustdb.server.sql.executor.ExecutorResult;
 import com.robustdb.server.sql.executor.physical.*;
 import com.robustdb.server.sql.parser.*;
 import lombok.extern.slf4j.Slf4j;
@@ -9,9 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 public class MySqlEngine implements SQLEngine {
 
 
-    public void executeSql(String sql) {
+    public ExecutorResult executeSql(String sql) {
         ParseResult parseResult = getChainOfParsers().parseSql(sql);
-        getChainOfExecutors().executePlan(parseResult);
+        return getChainOfExecutors().executePlan(parseResult);
     }
 
     private static AbstractSQLParser getChainOfParsers() {

@@ -1,25 +1,19 @@
 package com.robustdb.server.netty.biz;
 
-import com.robustdb.server.protocol.mysql.MySQLMessage;
-import com.robustdb.server.protocol.mysql.MySQLPacket;
 import com.robustdb.server.protocol.mysql.OkPacket;
 import com.robustdb.server.sql.MySqlEngine;
 import com.robustdb.server.sql.mycat.manager.ManageSelectHandler;
 import com.robustdb.server.sql.mycat.manager.ManagerParse;
 import com.robustdb.server.sql.mycat.manager.SelectVariables;
+import com.robustdb.server.sql.mycat.server.DDLHandler;
+import com.robustdb.server.sql.mycat.server.DMLHandler;
 import com.robustdb.server.sql.mycat.server.ServerParse;
-import com.robustdb.server.util.GlobalSqlUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -57,7 +51,7 @@ public class ServerQueryBizHandler {
 				log.info("SELECT");
 
 				log.info("Normal sql detected, Sql content : {}", sql);
-				mySqlEngine.executeSql(sql);
+//				mySqlEngine.executeSql(sql);
 				bufferOut= SelectVariables.execute(sql,null);
 				break;
 			case ServerParse.START:
@@ -79,6 +73,8 @@ public class ServerQueryBizHandler {
 				break;
 			case ServerParse.USE:
 				log.info("USE");
+				bufferOut = Unpooled.buffer();
+				bufferOut.writeBytes(OkPacket.OK);
 				break;
 			case ServerParse.COMMIT:
 				log.info("COMMIT");
@@ -110,6 +106,23 @@ public class ServerQueryBizHandler {
 				break;
 			case ServerParse.DDL:
 				log.info("DDL");
+				bufferOut = DDLHandler.handle(sql);
+				break;
+			case ServerParse.CREATE:
+				log.info("CREATE");
+				bufferOut = DDLHandler.handle(sql);
+				break;
+			case ServerParse.DROP:
+				log.info("CREATE");
+				bufferOut = DDLHandler.handle(sql);
+				break;
+			case ServerParse.TRUNCATE:
+				log.info("CREATE");
+				bufferOut = DDLHandler.handle(sql);
+				break;
+			case ServerParse.ALTER:
+				log.info("CREATE");
+				bufferOut = DDLHandler.handle(sql);
 				break;
 			default:
 				log.info("default");
@@ -124,6 +137,7 @@ public class ServerQueryBizHandler {
 			case ServerParse.COMMAND:
 				// curd 在后面会更新
 				log.info("crud");
+				bufferOut = DMLHandler.handle(sql);
 				break;
 			default:
 				log.info("default again");

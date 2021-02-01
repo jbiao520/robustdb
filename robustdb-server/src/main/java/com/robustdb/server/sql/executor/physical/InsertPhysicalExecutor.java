@@ -9,8 +9,12 @@ import com.robustdb.server.exception.RobustDBValidationException;
 import com.robustdb.server.model.metadata.TableDef;
 import com.robustdb.server.model.parser.InsertParseResult;
 import com.robustdb.server.model.parser.ParseResult;
+import com.robustdb.server.protocol.mysql.OkPacket;
 import com.robustdb.server.sql.def.DefinitionCache;
+import com.robustdb.server.sql.executor.ExecutorResult;
 import com.robustdb.server.util.Requires;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,7 +23,7 @@ import java.util.Map;
 public class InsertPhysicalExecutor extends AbstractPhysicalExecutor {
 
     @Override
-    protected void execute(ParseResult parseResult) {
+    protected ExecutorResult execute(ParseResult parseResult) {
         InsertParseResult insertParseResult = (InsertParseResult) parseResult;
         String tableName = insertParseResult.getTableName();
         List<SQLExpr> columns = insertParseResult.getColumns();
@@ -55,6 +59,9 @@ public class InsertPhysicalExecutor extends AbstractPhysicalExecutor {
         for (Map.Entry<String, Map<String, String>> idxEntry : indexMap.entrySet()) {
             kvClient.insertData(idxEntry.getValue(), idxEntry.getKey());
         }
+        ByteBuf byteBuf = Unpooled.buffer();
+        byteBuf.writeBytes(OkPacket.OK);
+        return ExecutorResult.builder().byteBuf(byteBuf).build();
     }
 
     private void populateRowValue(TableDef tableDef, Map<String, SQLExpr> rowValueMap, JsonObject valueJson, JsonObject keyJson, boolean isIndex) {

@@ -70,7 +70,7 @@ public class ServerCommandServerHandler extends ChannelInboundHandlerAdapter {
 					}else{
 						log.info("Normal sql detected, Sql content : {}", sql);
 						bufferOut = serverQueryBizHandler.handle(sql);
-						mySqlEngine.executeSql(sql);
+//						mySqlEngine.executeSql(sql);
 						ctx.write(bufferOut);
 						ctx.flush();
 					}
@@ -135,12 +135,12 @@ public class ServerCommandServerHandler extends ChannelInboundHandlerAdapter {
 	@Override
 	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 		super.channelInactive(ctx);
-		clientSqls.forEach((k,v)->{
-			log.info("Dumping all sqls for:{}",k);
-			v.forEach(sql->{
-				log.info(sql);
-			});
-		});
+//		clientSqls.forEach((k,v)->{
+//			log.info("Dumping all sqls for:{}",k);
+//			v.forEach(sql->{
+//				log.info(sql);
+//			});
+//		});
 	}
 
 	@Override

@@ -44,7 +44,7 @@ public class LocalKVClient implements KVClient {
         }
     }
 
-    public byte[] getDataData(String key, String tableName) {
+    public byte[] getDataNodeData(String key, String tableName) {
         try {
             return rocksdbInstance.getCfRelValue(KVConstants.DATA_NODE, tableName, key);
         } catch (RocksDBException e) {

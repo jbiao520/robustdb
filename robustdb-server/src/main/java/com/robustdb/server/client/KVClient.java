@@ -11,7 +11,7 @@ public interface KVClient {
 
     void insertData(Map<String, String> kvs, String tableName);
 
-    byte[] getDataData(String key, String tableName);
+    byte[] getDataNodeData(String key, String tableName);
 
     byte[] getMetaData(String key, String tableName);
 }

@@ -38,7 +38,12 @@ public final class ServerParse {
     public static final int UNLOCK = 23;
     public static final int LOAD_DATA_INFILE_SQL = 99;
     public static final int DDL = 100;
+
     public static final int COMMAND = 101;
+    public static final int CREATE = 102;
+    public static final int DROP = 103;
+    public static final int TRUNCATE = 104;
+    public static final int ALTER = 105;
     public static final String COM_FIELD_LIST_FLAG="select @@command ";
 
 
@@ -178,7 +183,7 @@ public final class ServerParse {
                     && (c6 == 'T' || c6 == 't')
                     && (c7 == 'E' || c7 == 'e')
                     && (c8 == ' ' || c8 == '\t' || c8 == '\r' || c8 == '\n')) {
-                return DDL;
+                return TRUNCATE;
             }
         }
         return OTHER;
@@ -196,7 +201,7 @@ public final class ServerParse {
                     && (c3 == 'E' || c3 == 'e')
                     && (c4 == 'R' || c4 == 'r')
                     && (c5 == ' ' || c5 == '\t' || c5 == '\r' || c5 == '\n')) {
-                return DDL;
+                return ALTER;
             }
         }
         return OTHER;
@@ -216,7 +221,7 @@ public final class ServerParse {
                     && (c4 == 'T' || c4 == 't')
                     && (c5 == 'E' || c5 == 'e')
                     && (c6 == ' ' || c6 == '\t' || c6 == '\r' || c6 == '\n')) {
-                return DDL;
+                return CREATE;
             }
         }
         return OTHER;
@@ -232,7 +237,7 @@ public final class ServerParse {
                     && (c2 == 'O' || c2 == 'o')
                     && (c3 == 'P' || c3 == 'p')
                     && (c4 == ' ' || c4 == '\t' || c4 == '\r' || c4 == '\n')) {
-                return DDL;
+                return DROP;
             }
         }
         return OTHER;

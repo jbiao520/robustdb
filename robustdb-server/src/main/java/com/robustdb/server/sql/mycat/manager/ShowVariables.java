@@ -91,5 +91,6 @@ public class ShowVariables {
         variables.put("lower_case_table_names", "1");
         variables.put("tx_isolation", "REPEATABLE-READ");
         variables.put("wait_timeout", "172800");
+        variables.put("databases", "robustdb");
     }
 }

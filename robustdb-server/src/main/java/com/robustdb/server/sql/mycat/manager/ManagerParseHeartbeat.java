@@ -1,7 +1,7 @@
 package com.robustdb.server.sql.mycat.manager;
 
 
-import com.sun.tools.javac.util.Pair;
+import com.robustdb.server.util.Pair;
 
 /**
  * @author songwie

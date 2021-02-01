@@ -7,8 +7,12 @@ import com.robustdb.server.model.metadata.TableDef;
 import com.robustdb.server.model.parser.AlterParseResult;
 import com.robustdb.server.model.parser.InsertParseResult;
 import com.robustdb.server.model.parser.ParseResult;
+import com.robustdb.server.protocol.mysql.OkPacket;
 import com.robustdb.server.sql.def.DefinitionCache;
+import com.robustdb.server.sql.executor.ExecutorResult;
 import com.robustdb.server.util.Constants;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -18,7 +22,7 @@ import java.util.Map;
 public class AlterPhysicalExecutor extends AbstractPhysicalExecutor {
 
     @Override
-    protected void execute(ParseResult parseResult) {
+    protected ExecutorResult execute(ParseResult parseResult) {
         AlterParseResult alterParseResult = (AlterParseResult) parseResult;
         String tableName = alterParseResult.getTableName();
         List<SQLIdentifierExpr> columns = alterParseResult.getColumns();
@@ -44,7 +48,9 @@ public class AlterPhysicalExecutor extends AbstractPhysicalExecutor {
             kvClient.createDataTable(indexTableName);
             DefinitionCache.addIndexTableDef(tableName,tableDef);
         }
-
+        ByteBuf byteBuf = Unpooled.buffer();
+        byteBuf.writeBytes(OkPacket.OK);
+        return ExecutorResult.builder().byteBuf(byteBuf).build();
     }
 
     @Override

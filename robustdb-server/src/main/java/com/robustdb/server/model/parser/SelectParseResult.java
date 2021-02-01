@@ -2,6 +2,7 @@ package com.robustdb.server.model.parser;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
+import io.netty.buffer.ByteBuf;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

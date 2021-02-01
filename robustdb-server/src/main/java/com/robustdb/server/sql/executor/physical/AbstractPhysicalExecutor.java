@@ -6,6 +6,10 @@ import com.robustdb.server.client.local.LocalKVClient;
 import com.robustdb.server.enums.ConstraintType;
 import com.robustdb.server.model.metadata.TableDef;
 import com.robustdb.server.model.parser.ParseResult;
+import com.robustdb.server.protocol.mysql.OkPacket;
+import com.robustdb.server.sql.executor.ExecutorResult;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 
 import java.util.List;
 
@@ -17,16 +21,19 @@ public abstract class AbstractPhysicalExecutor {
     public void setNextExecutor(AbstractPhysicalExecutor sqlExectuor){
         this.nextExecutor = sqlExectuor;
     }
-    public void executePlan(ParseResult parseResult) {
+    public ExecutorResult executePlan(ParseResult parseResult) {
         if (compatible(parseResult)) {
-            execute(parseResult);
+            return execute(parseResult);
         }
         if (nextExecutor != null) {
-            nextExecutor.executePlan(parseResult);
+            return  nextExecutor.executePlan(parseResult);
         }
+        ByteBuf byteBuf = Unpooled.buffer();
+        byteBuf.writeBytes(OkPacket.OK);
+        return ExecutorResult.builder().byteBuf(byteBuf).build();
     }
 
-    abstract protected void execute(ParseResult parseResult);
+    abstract protected ExecutorResult execute(ParseResult parseResult);
 
     abstract protected boolean compatible(ParseResult parseResult);
 

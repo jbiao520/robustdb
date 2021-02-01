@@ -7,13 +7,17 @@ import com.robustdb.server.model.metadata.ColumnDef;
 import com.robustdb.server.model.metadata.TableDef;
 import com.robustdb.server.model.parser.CreateParseResult;
 import com.robustdb.server.model.parser.ParseResult;
+import com.robustdb.server.protocol.mysql.OkPacket;
 import com.robustdb.server.sql.def.DefinitionCache;
+import com.robustdb.server.sql.executor.ExecutorResult;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 
 import java.util.*;
 
 public class CreatePhysicalExecutor extends AbstractPhysicalExecutor{
     @Override
-    protected void execute(ParseResult parseResult) {
+    protected ExecutorResult execute(ParseResult parseResult) {
         CreateParseResult createParseResult = (CreateParseResult)parseResult;
         String tableName = createParseResult.getTableName();
         String rawReq = createParseResult.getRawTableDef();
@@ -58,6 +62,9 @@ public class CreatePhysicalExecutor extends AbstractPhysicalExecutor{
         kvClient.createTableMetaData(tableDef);
         kvClient.createDataTable(tableName);
         DefinitionCache.addTableDef(tableName,tableDef);
+        ByteBuf byteBuf = Unpooled.buffer();
+        byteBuf.writeBytes(OkPacket.OK);
+        return ExecutorResult.builder().byteBuf(byteBuf).build();
     }
 
     @Override

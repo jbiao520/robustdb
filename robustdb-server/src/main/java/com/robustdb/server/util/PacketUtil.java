@@ -12,7 +12,7 @@ import java.io.UnsupportedEncodingException;
  * @author mycat
  */
 public class PacketUtil {
-    private static final String CODE_PAGE_1252 = "iso-8859-1";
+    private static final String CODE_PAGE_1252 = "utf-8";
 
     public static final ResultSetHeaderPacket getHeader(int fieldCount) {
         ResultSetHeaderPacket packet = new ResultSetHeaderPacket();
