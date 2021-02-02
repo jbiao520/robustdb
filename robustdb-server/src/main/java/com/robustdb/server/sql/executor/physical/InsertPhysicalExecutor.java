@@ -51,7 +51,14 @@ public class InsertPhysicalExecutor extends AbstractPhysicalExecutor {
                     indexMap.get(idxDef.getTableName()).put(indexJson.toString(), keyBuffer.toString());
                 } else {
                     Map<String, String> indexVal = new HashMap<>();
-                    indexVal.put(tableName+"_"+indexName+"_"+indexJson.toString(), keyBuffer.toString());
+                    String keyPrefix = tableName+"_"+indexName+"_"+indexJson.toString();
+                    if(idxDef.isUnique()){
+                        indexVal.put(keyPrefix,keyBuffer.toString());
+                    }else{
+                        String key = keyPrefix+"_"+keyBuffer.toString();
+                        indexVal.put(key,null);
+                    }
+
                     indexMap.put(indexName, indexVal);
                 }
             }

@@ -2,6 +2,7 @@ package com.robustdb.server.client;
 
 import com.robustdb.server.model.metadata.TableDef;
 
+import java.util.List;
 import java.util.Map;
 
 public interface KVClient {
@@ -14,4 +15,5 @@ public interface KVClient {
     byte[] getDataNodeData(String key);
 
     byte[] getMetaData(String key, String tableName);
+    List<String> getSecondaryIndexesOnDataNode(String key);
 }

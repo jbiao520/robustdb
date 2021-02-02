@@ -21,4 +21,5 @@ public class AlterParseResult implements ParseResult{
     private String rawSQL;
     private List<SQLIdentifierExpr> columns;
     private AlterType alterType;
+    private boolean isUnique;
 }

@@ -42,6 +42,7 @@ public class AlterPhysicalExecutor extends AbstractPhysicalExecutor {
                     .tableName(indexTableName)
                     .primaryKey(Constants.IDX_TBL_PK)
                     .columnDefMap(columnDefMap)
+                    .isUnique(alterParseResult.isUnique())
                     .isIndexTable(true)
                     .build();
             kvClient.createTableMetaData(tableDef);

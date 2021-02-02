@@ -125,16 +125,32 @@ public class SelectPhysicalExecutor extends AbstractPhysicalExecutor {
         for (String s : indexTableDef.getColumnDefMap().keySet()) {
             indexJson.addProperty(s, queryCondition.get(s));
         }
-        byte[] key = kvClient.getDataNodeData(tableName+"_"+indexName+"_"+indexJson.toString());
-        if (key != null) {
-            byte[] value = kvClient.getDataNodeData(new String(key));
-            if (value != null) {
-                String valueJson = new String(value);
-                JsonObject jsonObject = gson.fromJson(valueJson, JsonObject.class);
-                jsonObjectList.add(jsonObject);
+        String keyHint = tableName+"_"+indexName+"_"+indexJson.toString();
+        if(indexTableDef.isUnique()){
+            byte[] key = kvClient.getDataNodeData(keyHint);
+            if (key != null) {
+                byte[] value = kvClient.getDataNodeData(new String(key));
+                if (value != null) {
+                    String valueJson = new String(value);
+                    JsonObject jsonObject = gson.fromJson(valueJson, JsonObject.class);
+                    jsonObjectList.add(jsonObject);
+                }
+            }
+        }else{
+
+            List<String> keys = kvClient.getSecondaryIndexesOnDataNode(keyHint);
+            for(String key:keys){
+                String pk = key.replace(keyHint+"_","");
+                if (pk != null) {
+                    byte[] value = kvClient.getDataNodeData(new String(pk));
+                    if (value != null) {
+                        String valueJson = new String(value);
+                        JsonObject jsonObject = gson.fromJson(valueJson, JsonObject.class);
+                        jsonObjectList.add(jsonObject);
+                    }
+                }
             }
         }
-
     }
 
     @Override

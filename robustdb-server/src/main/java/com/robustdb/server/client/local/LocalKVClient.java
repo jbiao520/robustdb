@@ -6,7 +6,11 @@ import com.robustdb.kv.rocksdb.RocksdbInstance;
 import com.robustdb.server.client.KVClient;
 import com.robustdb.server.model.metadata.TableDef;
 import org.rocksdb.RocksDBException;
+import org.rocksdb.RocksIterator;
 
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 
@@ -35,9 +39,9 @@ public class LocalKVClient implements KVClient {
     public void insertData(Map<String, String> kvs) {
         for (Map.Entry<String, String> entry : kvs.entrySet()) {
             try {
-                String key = entry.getKey();
-                String value = entry.getValue();
-                rocksdbInstance.putCfKeyValue(KVConstants.DATA_NODE, "default", key.getBytes(), value.getBytes());
+                byte[] key = entry.getKey().getBytes();
+                byte[] value = entry.getValue() == null ? new byte[0] : entry.getValue().getBytes();
+                rocksdbInstance.putCfKeyValue(KVConstants.DATA_NODE, "default", key, value);
             } catch (RocksDBException e) {
                 e.printStackTrace();
             }
@@ -60,5 +64,25 @@ public class LocalKVClient implements KVClient {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public List<String> getSecondaryIndexesOnDataNode(String key) {
+        List<String> keyList = new ArrayList<>();
+        RocksIterator iterator = rocksdbInstance.getCfAllValues(KVConstants.DATA_NODE, "default");
+        iterator.seek(key.getBytes());
+//        iterator.seekForPrev(key.getBytes());
+        while (iterator.isValid()) {
+            String secIndexKey = new String(iterator.key());
+            if (secIndexKey.startsWith(key)) {
+                keyList.add(secIndexKey);
+                iterator.next();
+            } else {
+                break;
+            }
+
+        }
+        iterator.close();
+
+        return keyList;
     }
 }

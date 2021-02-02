@@ -19,4 +19,5 @@ public class TableDef {
     private Map<String, ColumnDef> columnDefMap;
     private String comment;
     private boolean isIndexTable;
+    private boolean isUnique;
 }

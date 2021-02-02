@@ -51,6 +51,7 @@ public class AlterQuerySQLParser extends AbstractSQLParser {
                 .alterType(AlterType.ADDINDEX)
                 .tableName(tableName)
                 .indexName(indexName)
+                .isUnique(addIndex.isUnique())
                 .columns(sqlIdentifierExprs)
                 .rawSQL(sql)
                 .build();

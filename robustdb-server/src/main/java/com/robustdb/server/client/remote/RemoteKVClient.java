@@ -8,6 +8,7 @@ import com.robustdb.server.client.KVClient;
 import com.robustdb.server.model.metadata.TableDef;
 import org.rocksdb.RocksDBException;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -67,6 +68,11 @@ public class RemoteKVClient implements KVClient {
 //        } catch (RocksDBException e) {
 //            e.printStackTrace();
 //        }
+        return null;
+    }
+
+    @Override
+    public List<String> getSecondaryIndexesOnDataNode(String key) {
         return null;
     }
 }
