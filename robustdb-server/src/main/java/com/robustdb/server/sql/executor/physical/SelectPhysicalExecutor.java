@@ -119,13 +119,15 @@ public class SelectPhysicalExecutor extends AbstractPhysicalExecutor {
     }
 
     private void queryOnIndex(TableDef tableDef, Map<String, String> queryCondition, TableDef indexTableDef, List<JsonObject> jsonObjectList) {
+        String tableName = tableDef.getTableName();
+        String indexName = indexTableDef.getTableName();
         JsonObject indexJson = new JsonObject();
         for (String s : indexTableDef.getColumnDefMap().keySet()) {
             indexJson.addProperty(s, queryCondition.get(s));
         }
-        byte[] key = kvClient.getDataNodeData(indexJson.toString(), indexTableDef.getTableName());
+        byte[] key = kvClient.getDataNodeData(tableName+"_"+indexName+"_"+indexJson.toString());
         if (key != null) {
-            byte[] value = kvClient.getDataNodeData(new String(key), tableDef.getTableName());
+            byte[] value = kvClient.getDataNodeData(new String(key));
             if (value != null) {
                 String valueJson = new String(value);
                 JsonObject jsonObject = gson.fromJson(valueJson, JsonObject.class);

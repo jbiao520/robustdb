@@ -32,21 +32,21 @@ public class LocalKVClient implements KVClient {
         }
     }
 
-    public void insertData(Map<String, String> kvs, String tableName) {
+    public void insertData(Map<String, String> kvs) {
         for (Map.Entry<String, String> entry : kvs.entrySet()) {
             try {
                 String key = entry.getKey();
                 String value = entry.getValue();
-                rocksdbInstance.putCfKeyValue(KVConstants.DATA_NODE, tableName, key.getBytes(), value.getBytes());
+                rocksdbInstance.putCfKeyValue(KVConstants.DATA_NODE, "default", key.getBytes(), value.getBytes());
             } catch (RocksDBException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public byte[] getDataNodeData(String key, String tableName) {
+    public byte[] getDataNodeData(String key) {
         try {
-            return rocksdbInstance.getCfRelValue(KVConstants.DATA_NODE, tableName, key);
+            return rocksdbInstance.getCfRelValue(KVConstants.DATA_NODE, "default", key);
         } catch (RocksDBException e) {
             e.printStackTrace();
         }

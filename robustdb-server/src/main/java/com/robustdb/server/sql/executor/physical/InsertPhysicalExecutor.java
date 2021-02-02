@@ -38,39 +38,41 @@ public class InsertPhysicalExecutor extends AbstractPhysicalExecutor {
         //process each row
         for (Map<String, SQLExpr> rowValueMap : values) {
             JsonObject valueJson = new JsonObject();
-            JsonObject keyJson = new JsonObject();
-            populateRowValue(tableDef, rowValueMap, valueJson, keyJson, false);
-            map.put(keyJson.toString(), valueJson.toString());
+//            JsonObject keyJson = new JsonObject();
+            StringBuilder keyBuffer = new StringBuilder(tableName);
+            populateRowValue(tableDef, rowValueMap, valueJson, keyBuffer, false);
+            map.put(keyBuffer.toString(), valueJson.toString());
 
             for (TableDef idxDef : indexTableDefs) {
+                String indexName = idxDef.getTableName();
                 JsonObject indexJson = new JsonObject();
                 populateRowValue(idxDef, rowValueMap, indexJson, null, true);
                 if (indexMap.get(idxDef.getTableName()) != null) {
-                    indexMap.get(idxDef.getTableName()).put(indexJson.toString(), keyJson.toString());
+                    indexMap.get(idxDef.getTableName()).put(indexJson.toString(), keyBuffer.toString());
                 } else {
                     Map<String, String> indexVal = new HashMap<>();
-                    indexVal.put(indexJson.toString(), keyJson.toString());
-                    indexMap.put(idxDef.getTableName(), indexVal);
+                    indexVal.put(tableName+"_"+indexName+"_"+indexJson.toString(), keyBuffer.toString());
+                    indexMap.put(indexName, indexVal);
                 }
             }
         }
 
-        kvClient.insertData(map, tableName);
+        kvClient.insertData(map);
         for (Map.Entry<String, Map<String, String>> idxEntry : indexMap.entrySet()) {
-            kvClient.insertData(idxEntry.getValue(), idxEntry.getKey());
+            kvClient.insertData(idxEntry.getValue());
         }
         ByteBuf byteBuf = Unpooled.buffer();
         byteBuf.writeBytes(OkPacket.OK);
         return ExecutorResult.builder().byteBuf(byteBuf).build();
     }
 
-    private void populateRowValue(TableDef tableDef, Map<String, SQLExpr> rowValueMap, JsonObject valueJson, JsonObject keyJson, boolean isIndex) {
+    private void populateRowValue(TableDef tableDef, Map<String, SQLExpr> rowValueMap, JsonObject valueJson, StringBuilder keyBuffer, boolean isIndex) {
         for (Map.Entry<String, SQLExpr> rowEntry : rowValueMap.entrySet()) {
             SQLExpr rowValue = rowEntry.getValue();
             String columnName = rowEntry.getKey();
             if (!isIndex) {
                 List<ConstraintType> constraints = getConstriants(tableDef, columnName);
-                constraintCheck(constraints, rowValue, keyJson);
+                constraintCheck(constraints, rowValue, keyBuffer);
             }
             if (rowValue instanceof SQLIntegerExpr) {
                 if(tableDef.getColumnDefMap().containsKey(rowEntry.getKey())){
@@ -91,13 +93,17 @@ public class InsertPhysicalExecutor extends AbstractPhysicalExecutor {
         return parseResult instanceof InsertParseResult;
     }
 
-    private void constraintCheck(List<ConstraintType> constraints, SQLExpr value, JsonObject keyJson) {
+    private void constraintCheck(List<ConstraintType> constraints, SQLExpr value, StringBuilder keyBuffer) {
         for (ConstraintType constraintType : constraints) {
             if (constraintType == ConstraintType.PK) {
                 if (value instanceof SQLIntegerExpr) {
-                    keyJson.addProperty("pk", ((SQLIntegerExpr) value).getNumber());
+                    keyBuffer.append("_");
+                    keyBuffer.append(((SQLIntegerExpr) value).getNumber());
+//                    keyJson.addProperty("pk", ((SQLIntegerExpr) value).getNumber());
                 } else if (value instanceof SQLCharExpr) {
-                    keyJson.addProperty("pk", ((SQLCharExpr) value).getText());
+                    keyBuffer.append("_");
+                    keyBuffer.append(((SQLCharExpr) value).getText());
+//                    keyJson.addProperty("pk", ((SQLCharExpr) value).getText());
                 } else {
                     throw new RobustDBValidationException("Invalid parameter:" + value);
                 }

@@ -45,7 +45,7 @@ public class AlterPhysicalExecutor extends AbstractPhysicalExecutor {
                     .isIndexTable(true)
                     .build();
             kvClient.createTableMetaData(tableDef);
-            kvClient.createDataTable(indexTableName);
+//            kvClient.createDataTable(indexTableName);
             DefinitionCache.addIndexTableDef(tableName,tableDef);
         }
         ByteBuf byteBuf = Unpooled.buffer();

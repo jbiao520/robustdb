@@ -41,9 +41,9 @@ public class RocksdbInstance {
         Map<String, ColumnFamilyHandle> cfHandleMap = new HashMap<>();
         try (final ColumnFamilyOptions cfOpts = new ColumnFamilyOptions().optimizeUniversalStyleCompaction()) {
             final List<ColumnFamilyDescriptor> cfDescriptors = new ArrayList<>();
-            for (String tableName : tableNames) {
-                cfDescriptors.add(new ColumnFamilyDescriptor(tableName.getBytes(), cfOpts));
-            }
+//            for (String tableName : tableNames) {
+//                cfDescriptors.add(new ColumnFamilyDescriptor(tableName.getBytes(), cfOpts));
+//            }
             cfDescriptors.add(new ColumnFamilyDescriptor(RocksDB.DEFAULT_COLUMN_FAMILY, cfOpts));
             DBOptions options = new DBOptions().setCreateIfMissing(true).setCreateMissingColumnFamilies(true).setMaxTotalWalSize(128 << 20);
             // a factory method that returns a RocksDB instance

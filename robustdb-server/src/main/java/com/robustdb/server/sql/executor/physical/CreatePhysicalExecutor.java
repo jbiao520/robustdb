@@ -60,7 +60,7 @@ public class CreatePhysicalExecutor extends AbstractPhysicalExecutor{
                 .isIndexTable(false)
                 .build();
         kvClient.createTableMetaData(tableDef);
-        kvClient.createDataTable(tableName);
+//        kvClient.createDataTable(tableName);
         DefinitionCache.addTableDef(tableName,tableDef);
         ByteBuf byteBuf = Unpooled.buffer();
         byteBuf.writeBytes(OkPacket.OK);

@@ -40,7 +40,7 @@ public class RemoteKVClient implements KVClient {
 //        }
     }
 
-    public void insertData(Map<String, String> kvs, String tableName) {
+    public void insertData(Map<String, String> kvs) {
 //        for (Map.Entry<String, String> entry : kvs.entrySet()) {
 //            try {
 //                String key = entry.getKey();
@@ -52,7 +52,7 @@ public class RemoteKVClient implements KVClient {
 //        }
     }
 
-    public byte[] getDataNodeData(String key, String tableName) {
+    public byte[] getDataNodeData(String key) {
 //        try {
 //            return rocksdbInstance.getCfRelValue(KVConstants.DATA_NODE, tableName, key);
 //        } catch (RocksDBException e) {
