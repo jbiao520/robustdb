@@ -9,9 +9,11 @@ import com.robustdb.server.exception.RobustDBValidationException;
 import com.robustdb.server.model.metadata.TableDef;
 import com.robustdb.server.model.parser.InsertParseResult;
 import com.robustdb.server.model.parser.ParseResult;
+import com.robustdb.server.protocol.mysql.ErrorPacket;
 import com.robustdb.server.protocol.mysql.OkPacket;
 import com.robustdb.server.sql.def.DefinitionCache;
 import com.robustdb.server.sql.executor.ExecutorResult;
+import com.robustdb.server.util.ErrorCode;
 import com.robustdb.server.util.Requires;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -41,7 +43,11 @@ public class InsertPhysicalExecutor extends AbstractPhysicalExecutor {
 //            JsonObject keyJson = new JsonObject();
             StringBuilder keyBuffer = new StringBuilder(tableName);
             populateRowValue(tableDef, rowValueMap, valueJson, keyBuffer, false);
-            map.put(keyBuffer.toString(), valueJson.toString());
+            String pk = keyBuffer.toString();
+            if(validateUK(pk)){
+                return getUKError();
+            }
+            map.put(pk, valueJson.toString());
 
             for (TableDef idxDef : indexTableDefs) {
                 String indexName = idxDef.getTableName();
@@ -53,6 +59,9 @@ public class InsertPhysicalExecutor extends AbstractPhysicalExecutor {
                     Map<String, String> indexVal = new HashMap<>();
                     String keyPrefix = tableName+"_"+indexName+"_"+indexJson.toString();
                     if(idxDef.isUnique()){
+                        if(validateUK(keyPrefix)){
+                            return getUKError();
+                        }
                         indexVal.put(keyPrefix,keyBuffer.toString());
                     }else{
                         String key = keyPrefix+"_"+keyBuffer.toString();
@@ -71,6 +80,19 @@ public class InsertPhysicalExecutor extends AbstractPhysicalExecutor {
         ByteBuf byteBuf = Unpooled.buffer();
         byteBuf.writeBytes(OkPacket.OK);
         return ExecutorResult.builder().byteBuf(byteBuf).build();
+    }
+
+    private ExecutorResult getUKError() {
+        ErrorPacket error = new ErrorPacket();
+        error.packetId = 1;
+        error.errno = ErrorCode.ER_INSERT_INFO;
+        error.message = "Duplicated record found".getBytes();
+        ByteBuf byteBuf =error.write();
+        return ExecutorResult.builder().byteBuf(byteBuf).build();
+    }
+
+    private boolean validateUK(String key){
+        return kvClient.containsKeyInDataNode(key);
     }
 
     private void populateRowValue(TableDef tableDef, Map<String, SQLExpr> rowValueMap, JsonObject valueJson, StringBuilder keyBuffer, boolean isIndex) {

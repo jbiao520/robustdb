@@ -75,4 +75,9 @@ public class RemoteKVClient implements KVClient {
     public List<String> getSecondaryIndexesOnDataNode(String key) {
         return null;
     }
+
+    @Override
+    public boolean containsKeyInDataNode(String key) {
+        return false;
+    }
 }

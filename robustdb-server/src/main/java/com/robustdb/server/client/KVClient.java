@@ -15,5 +15,8 @@ public interface KVClient {
     byte[] getDataNodeData(String key);
 
     byte[] getMetaData(String key, String tableName);
+
     List<String> getSecondaryIndexesOnDataNode(String key);
+
+    boolean containsKeyInDataNode(String key);
 }

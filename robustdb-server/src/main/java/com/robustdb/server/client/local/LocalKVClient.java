@@ -85,4 +85,14 @@ public class LocalKVClient implements KVClient {
 
         return keyList;
     }
+
+    @Override
+    public boolean containsKeyInDataNode(String key) {
+        try {
+            return rocksdbInstance.getCfRelValue(KVConstants.DATA_NODE, "default", key)!=null;
+        } catch (RocksDBException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
