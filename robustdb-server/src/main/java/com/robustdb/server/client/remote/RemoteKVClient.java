@@ -1,6 +1,7 @@
 package com.robustdb.server.client.remote;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.robustdb.kv.constants.KVConstants;
 import com.robustdb.kv.rocksdb.RocksdbInstance;
 import com.robustdb.rheakv.client.RheaKVClient;
@@ -80,4 +81,10 @@ public class RemoteKVClient implements KVClient {
     public boolean containsKeyInDataNode(String key) {
         return false;
     }
+
+    @Override
+    public List<JsonObject> fullTableScan(Map<String, String> queryCondition, String prefix) {
+        return null;
+    }
+
 }

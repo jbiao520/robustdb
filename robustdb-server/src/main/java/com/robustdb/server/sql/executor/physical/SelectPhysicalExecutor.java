@@ -50,15 +50,22 @@ public class SelectPhysicalExecutor extends AbstractPhysicalExecutor {
             }
 
             TableDef indexTableDef = analyzeQueryPlan(parallelOps, tableName);
-            List<JsonObject> jsonObjectList = new ArrayList<>();
+            List<JsonObject> jsonObjectList = null;
             if (indexTableDef != null) {
-                queryOnIndex(tableDef, queryCondition, indexTableDef, jsonObjectList);
-
-                return formSelectResult(selectList, jsonObjectList);
+                jsonObjectList = queryOnIndex(tableDef, queryCondition, indexTableDef);
+            } else {
+                jsonObjectList = fulltableScan(tableDef, queryCondition);
             }
+            return formSelectResult(selectList, jsonObjectList);
         }
 
         return null;
+    }
+
+    private List<JsonObject> fulltableScan(TableDef tableDef, Map<String, String> queryCondition) {
+        String tableName = tableDef.getTableName();
+        return kvClient.fullTableScan(queryCondition, tableName + "_");
+
     }
 
     private ExecutorResult formSelectResult(List<SQLSelectItem> selectList, List<JsonObject> jsonObjectList) {
@@ -76,29 +83,19 @@ public class SelectPhysicalExecutor extends AbstractPhysicalExecutor {
             fields[i].charsetIndex = CharsetUtil.getIndex("utf-8");
             fields[i].length = fields[i].calcPacketSize();
             fields[i++].packetId = ++packetId;
-
         }
-
-
         ByteBuf buffer = Unpooled.buffer();
-
         // write header
         buffer = header.write(buffer);
-
         // write fields
         for (FieldPacket field : fields) {
             buffer = field.write(buffer);
         }
-
-
         EOFPacket eof = new EOFPacket();
         eof.packetId = ++packetId;
         // write eof
         buffer = eof.write(buffer);
-
         // write rows
-        //byte packetId = eof.packetId;
-
         for (JsonObject jsonObject : jsonObjectList) {
             RowDataPacket row = new RowDataPacket(size);
             for (int i1 = 0, splitVarSize = size; i1 < splitVarSize; i1++) {
@@ -109,7 +106,6 @@ public class SelectPhysicalExecutor extends AbstractPhysicalExecutor {
             row.packetId = ++packetId;
             buffer = row.write(buffer);
         }
-
         // write lastEof
         EOFPacket lastEof = new EOFPacket();
         lastEof.packetId = ++packetId;
@@ -118,15 +114,16 @@ public class SelectPhysicalExecutor extends AbstractPhysicalExecutor {
         return ExecutorResult.builder().byteBuf(buffer).build();
     }
 
-    private void queryOnIndex(TableDef tableDef, Map<String, String> queryCondition, TableDef indexTableDef, List<JsonObject> jsonObjectList) {
+    private List<JsonObject> queryOnIndex(TableDef tableDef, Map<String, String> queryCondition, TableDef indexTableDef) {
+        List<JsonObject> jsonObjectList = new ArrayList<>();
         String tableName = tableDef.getTableName();
         String indexName = indexTableDef.getTableName();
         JsonObject indexJson = new JsonObject();
         for (String s : indexTableDef.getColumnDefMap().keySet()) {
             indexJson.addProperty(s, queryCondition.get(s));
         }
-        String keyHint = tableName+"_"+indexName+"_"+indexJson.toString();
-        if(indexTableDef.isUnique()){
+        String keyHint = tableName + "_" + indexName + "_" + indexJson.toString();
+        if (indexTableDef.isUnique()) {
             byte[] key = kvClient.getDataNodeData(keyHint);
             if (key != null) {
                 byte[] value = kvClient.getDataNodeData(new String(key));
@@ -136,11 +133,10 @@ public class SelectPhysicalExecutor extends AbstractPhysicalExecutor {
                     jsonObjectList.add(jsonObject);
                 }
             }
-        }else{
-
+        } else {
             List<String> keys = kvClient.getSecondaryIndexesOnDataNode(keyHint);
-            for(String key:keys){
-                String pk = key.replace(keyHint+"_","");
+            for (String key : keys) {
+                String pk = key.replace(keyHint + "_", "");
                 if (pk != null) {
                     byte[] value = kvClient.getDataNodeData(new String(pk));
                     if (value != null) {
@@ -151,6 +147,7 @@ public class SelectPhysicalExecutor extends AbstractPhysicalExecutor {
                 }
             }
         }
+        return jsonObjectList;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.robustdb.server.client.local;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.robustdb.kv.constants.KVConstants;
 import com.robustdb.kv.rocksdb.RocksdbInstance;
 import com.robustdb.server.client.KVClient;
@@ -70,7 +71,6 @@ public class LocalKVClient implements KVClient {
         List<String> keyList = new ArrayList<>();
         RocksIterator iterator = rocksdbInstance.getCfAllValues(KVConstants.DATA_NODE, "default");
         iterator.seek(key.getBytes());
-//        iterator.seekForPrev(key.getBytes());
         while (iterator.isValid()) {
             String secIndexKey = new String(iterator.key());
             if (secIndexKey.startsWith(key)) {
@@ -89,10 +89,46 @@ public class LocalKVClient implements KVClient {
     @Override
     public boolean containsKeyInDataNode(String key) {
         try {
-            return rocksdbInstance.getCfRelValue(KVConstants.DATA_NODE, "default", key)!=null;
+            return rocksdbInstance.getCfRelValue(KVConstants.DATA_NODE, "default", key) != null;
         } catch (RocksDBException e) {
             e.printStackTrace();
         }
         return false;
+    }
+
+    @Override
+    public List<JsonObject> fullTableScan(Map<String, String> queryConditions, String prefix) {
+        List<JsonObject> rowList = new ArrayList<>();
+        RocksIterator iterator = rocksdbInstance.getCfAllValues(KVConstants.DATA_NODE, "default");
+        iterator.seek(prefix.getBytes());
+        String idxPrefix = prefix + prefix;
+        while (iterator.isValid()) {
+            String key = new String(iterator.key());
+
+            if (key.startsWith(prefix) && !key.startsWith(idxPrefix)) {
+                String records = new String(iterator.value());
+                JsonObject jsonObject = gson.fromJson(records, JsonObject.class);
+                boolean isQualified = true;
+                for (Map.Entry<String, String> kv : queryConditions.entrySet()) {
+                    String condition = kv.getKey();
+                    String value = kv.getValue();
+                    String recordValue = jsonObject.get(condition).getAsString();
+                    if (!recordValue.equals(value)) {
+                        isQualified = false;
+                        break;
+                    }
+                }
+                if (isQualified) {
+                    rowList.add(jsonObject);
+                }
+                iterator.next();
+            } else {
+                break;
+            }
+
+
+        }
+        iterator.close();
+        return rowList;
     }
 }

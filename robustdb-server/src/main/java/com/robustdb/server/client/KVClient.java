@@ -1,5 +1,6 @@
 package com.robustdb.server.client;
 
+import com.google.gson.JsonObject;
 import com.robustdb.server.model.metadata.TableDef;
 
 import java.util.List;
@@ -19,4 +20,6 @@ public interface KVClient {
     List<String> getSecondaryIndexesOnDataNode(String key);
 
     boolean containsKeyInDataNode(String key);
+
+    List<JsonObject> fullTableScan(Map<String, String> queryCondition, String prefix);
 }
