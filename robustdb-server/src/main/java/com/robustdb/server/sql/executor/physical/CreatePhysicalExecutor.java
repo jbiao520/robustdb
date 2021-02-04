@@ -52,13 +52,16 @@ public class CreatePhysicalExecutor extends AbstractPhysicalExecutor{
                     .build();
             columnDefMap.put(column.getColumnName(),columnDef);
         }
+        int tableId = kvClient.fetchTableId();
         TableDef tableDef = TableDef.builder()
                 .tableName(tableName)
                 .rawTableDef(rawReq)
                 .columnDefMap(columnDefMap)
                 .primaryKey(pk)
                 .isIndexTable(false)
+                .tableId(tableId)
                 .build();
+
         kvClient.createTableMetaData(tableDef);
 //        kvClient.createDataTable(tableName);
         DefinitionCache.addTableDef(tableName,tableDef);

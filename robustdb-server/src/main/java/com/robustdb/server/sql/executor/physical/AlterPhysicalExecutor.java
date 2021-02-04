@@ -38,12 +38,14 @@ public class AlterPhysicalExecutor extends AbstractPhysicalExecutor {
                         .build();
                 columnDefMap.put(column.getName(),columnDef);
             }
+            int tableId = kvClient.fetchTableId();
             TableDef tableDef = TableDef.builder().rawTableDef(alterParseResult.getRawSQL())
                     .tableName(indexTableName)
                     .primaryKey(Constants.IDX_TBL_PK)
                     .columnDefMap(columnDefMap)
                     .isUnique(alterParseResult.isUnique())
                     .isIndexTable(true)
+                    .tableId(tableId)
                     .build();
             kvClient.createTableMetaData(tableDef);
 //            kvClient.createDataTable(indexTableName);

@@ -101,11 +101,10 @@ public class LocalKVClient implements KVClient {
         List<JsonObject> rowList = new ArrayList<>();
         RocksIterator iterator = rocksdbInstance.getCfAllValues(KVConstants.DATA_NODE, "default");
         iterator.seek(prefix.getBytes());
-        String idxPrefix = prefix + prefix;
         while (iterator.isValid()) {
             String key = new String(iterator.key());
 
-            if (key.startsWith(prefix) && !key.startsWith(idxPrefix)) {
+            if (key.startsWith(prefix)) {
                 String records = new String(iterator.value());
                 JsonObject jsonObject = gson.fromJson(records, JsonObject.class);
                 boolean isQualified = true;
@@ -130,5 +129,23 @@ public class LocalKVClient implements KVClient {
         }
         iterator.close();
         return rowList;
+    }
+
+    @Override
+    public int fetchTableId() {
+        int tableId = 0;
+        synchronized (this.getClass()) {
+            try {
+                byte[] id = rocksdbInstance.getCfRelValue(KVConstants.META_DATA, KVConstants.META_DB_CONFIGS, "tableId");
+                if(id!=null){
+                    tableId = Integer.parseInt(new String(id));
+                }
+                tableId++;
+                rocksdbInstance.putCfKeyValue(KVConstants.META_DATA, KVConstants.META_DB_CONFIGS, "tableId".getBytes(), String.valueOf(tableId).getBytes());
+            } catch (RocksDBException e) {
+                e.printStackTrace();
+            }
+        }
+        return tableId;
     }
 }

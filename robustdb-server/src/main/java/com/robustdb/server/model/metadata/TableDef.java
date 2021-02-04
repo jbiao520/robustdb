@@ -20,4 +20,5 @@ public class TableDef {
     private String comment;
     private boolean isIndexTable;
     private boolean isUnique;
+    private int tableId;
 }

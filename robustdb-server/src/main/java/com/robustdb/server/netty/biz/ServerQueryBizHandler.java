@@ -146,34 +146,5 @@ public class ServerQueryBizHandler {
 		return bufferOut;
 	}
 
-	private boolean isMgmtSql(String sql){
-		int rs = ManagerParse.parse(sql);
-		switch (rs & 0xff) {
-			case ManagerParse.SELECT:
-				return ManageSelectHandler.isMgmtSelect(sql);
-			case ManagerParse.SET:
-				return true;
-			case ManagerParse.SHOW:
-				return true;
-			case ManagerParse.SWITCH:
-			case ManagerParse.KILL_CONN:
-			case ManagerParse.OFFLINE:
-			case ManagerParse.ONLINE:
-			case ManagerParse.STOP:
-			case ManagerParse.RELOAD:
-				return false;
-			case ManagerParse.ROLLBACK:
-				return false;
-			case ManagerParse.CLEAR:
-				return false;
-			case ManagerParse.CONFIGFILE:
-				return false;
-			case ManagerParse.LOGFILE:
-				return false;
-			case ManagerParse.ZK:
-				return false;
-			default:
-				return false;
-		}
-	}
+
 }

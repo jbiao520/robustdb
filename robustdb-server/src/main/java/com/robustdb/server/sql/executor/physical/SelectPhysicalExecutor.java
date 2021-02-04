@@ -63,8 +63,8 @@ public class SelectPhysicalExecutor extends AbstractPhysicalExecutor {
     }
 
     private List<JsonObject> fulltableScan(TableDef tableDef, Map<String, String> queryCondition) {
-        String tableName = tableDef.getTableName();
-        return kvClient.fullTableScan(queryCondition, tableName + "_");
+        int tableId = tableDef.getTableId();
+        return kvClient.fullTableScan(queryCondition, tableId + "_");
 
     }
 
@@ -116,13 +116,13 @@ public class SelectPhysicalExecutor extends AbstractPhysicalExecutor {
 
     private List<JsonObject> queryOnIndex(TableDef tableDef, Map<String, String> queryCondition, TableDef indexTableDef) {
         List<JsonObject> jsonObjectList = new ArrayList<>();
-        String tableName = tableDef.getTableName();
-        String indexName = indexTableDef.getTableName();
+        int tableId = tableDef.getTableId();
+        int indexId = indexTableDef.getTableId();
         JsonObject indexJson = new JsonObject();
         for (String s : indexTableDef.getColumnDefMap().keySet()) {
             indexJson.addProperty(s, queryCondition.get(s));
         }
-        String keyHint = tableName + "_" + indexName + "_" + indexJson.toString();
+        String keyHint = indexId + "_" + indexJson.toString();
         if (indexTableDef.isUnique()) {
             byte[] key = kvClient.getDataNodeData(keyHint);
             if (key != null) {

@@ -32,6 +32,7 @@ public class InsertPhysicalExecutor extends AbstractPhysicalExecutor {
         List<Map<String, SQLExpr>> values = insertParseResult.getValues();
         Requires.requireTrue(columns.size() == values.get(0).size(), "Column size and value size doesn't match");
         TableDef tableDef = DefinitionCache.getTableDef(tableName);
+        int tableId = tableDef.getTableId();
         List<TableDef> indexTableDefs = DefinitionCache.getIndexTableDefs(tableName);
 
         Map<String, String> map = new HashMap<>();
@@ -41,7 +42,7 @@ public class InsertPhysicalExecutor extends AbstractPhysicalExecutor {
         for (Map<String, SQLExpr> rowValueMap : values) {
             JsonObject valueJson = new JsonObject();
 //            JsonObject keyJson = new JsonObject();
-            StringBuilder keyBuffer = new StringBuilder(tableName);
+            StringBuilder keyBuffer = new StringBuilder(String.valueOf(tableId));
             populateRowValue(tableDef, rowValueMap, valueJson, keyBuffer, false);
             String pk = keyBuffer.toString();
             if(validateUK(pk)){
@@ -50,6 +51,7 @@ public class InsertPhysicalExecutor extends AbstractPhysicalExecutor {
             map.put(pk, valueJson.toString());
 
             for (TableDef idxDef : indexTableDefs) {
+                int indexId = idxDef.getTableId();
                 String indexName = idxDef.getTableName();
                 JsonObject indexJson = new JsonObject();
                 populateRowValue(idxDef, rowValueMap, indexJson, null, true);
@@ -57,7 +59,7 @@ public class InsertPhysicalExecutor extends AbstractPhysicalExecutor {
                     indexMap.get(idxDef.getTableName()).put(indexJson.toString(), keyBuffer.toString());
                 } else {
                     Map<String, String> indexVal = new HashMap<>();
-                    String keyPrefix = tableName+"_"+indexName+"_"+indexJson.toString();
+                    String keyPrefix = indexId+"_"+indexJson.toString();
                     if(idxDef.isUnique()){
                         if(validateUK(keyPrefix)){
                             return getUKError();

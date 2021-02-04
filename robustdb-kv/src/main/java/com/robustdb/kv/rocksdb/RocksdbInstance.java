@@ -21,7 +21,8 @@ public class RocksdbInstance {
         try (final ColumnFamilyOptions cfOpts = new ColumnFamilyOptions().optimizeUniversalStyleCompaction()) {
             final List<ColumnFamilyDescriptor> cfDescriptors = Arrays.asList(
                     new ColumnFamilyDescriptor(RocksDB.DEFAULT_COLUMN_FAMILY, cfOpts),
-                    new ColumnFamilyDescriptor(KVConstants.META_DB_TABLES.getBytes(), cfOpts)
+                    new ColumnFamilyDescriptor(KVConstants.META_DB_TABLES.getBytes(), cfOpts),
+                    new ColumnFamilyDescriptor(KVConstants.META_DB_CONFIGS.getBytes(), cfOpts)
             );
             DBOptions options = new DBOptions().setCreateIfMissing(true).setCreateMissingColumnFamilies(true).setMaxTotalWalSize(128 << 20);
             // a factory method that returns a RocksDB instance

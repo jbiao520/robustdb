@@ -87,4 +87,9 @@ public class RemoteKVClient implements KVClient {
         return null;
     }
 
+    @Override
+    public int fetchTableId() {
+        return 0;
+    }
+
 }
