@@ -11,6 +11,7 @@ import org.rocksdb.RocksIterator;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -97,8 +98,8 @@ public class LocalKVClient implements KVClient {
     }
 
     @Override
-    public List<JsonObject> fullTableScan(Map<String, String> queryConditions, String prefix) {
-        List<JsonObject> rowList = new ArrayList<>();
+    public Map<String,JsonObject> fullTableScan(Map<String, String> queryConditions, String prefix) {
+        Map<String,JsonObject> map  = new HashMap<>();
         RocksIterator iterator = rocksdbInstance.getCfAllValues(KVConstants.DATA_NODE, "default");
         iterator.seek(prefix.getBytes());
         while (iterator.isValid()) {
@@ -118,7 +119,7 @@ public class LocalKVClient implements KVClient {
                     }
                 }
                 if (isQualified) {
-                    rowList.add(jsonObject);
+                    map.put(key,jsonObject);
                 }
                 iterator.next();
             } else {
@@ -128,7 +129,7 @@ public class LocalKVClient implements KVClient {
 
         }
         iterator.close();
-        return rowList;
+        return map;
     }
 
     @Override

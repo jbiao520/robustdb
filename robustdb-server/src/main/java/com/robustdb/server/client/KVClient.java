@@ -21,7 +21,7 @@ public interface KVClient {
 
     boolean containsKeyInDataNode(String key);
 
-    List<JsonObject> fullTableScan(Map<String, String> queryCondition, String prefix);
+    Map<String,JsonObject> fullTableScan(Map<String, String> queryCondition, String prefix);
 
     int fetchTableId();
 }

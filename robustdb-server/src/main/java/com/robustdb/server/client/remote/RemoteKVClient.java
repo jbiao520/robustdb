@@ -83,7 +83,7 @@ public class RemoteKVClient implements KVClient {
     }
 
     @Override
-    public List<JsonObject> fullTableScan(Map<String, String> queryCondition, String prefix) {
+    public Map<String,JsonObject> fullTableScan(Map<String, String> queryCondition, String prefix) {
         return null;
     }
 
