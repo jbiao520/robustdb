@@ -8,6 +8,7 @@ import com.robustdb.server.enums.ConstraintType;
 import com.robustdb.server.exception.RobustDBValidationException;
 import com.robustdb.server.model.metadata.TableDef;
 import com.robustdb.server.model.parser.InsertParseResult;
+import com.robustdb.server.model.parser.MultiInsertParseResult;
 import com.robustdb.server.model.parser.ParseResult;
 import com.robustdb.server.protocol.mysql.ErrorPacket;
 import com.robustdb.server.protocol.mysql.OkPacket;
@@ -26,61 +27,68 @@ public class InsertPhysicalExecutor extends AbstractPhysicalExecutor {
 
     @Override
     protected ExecutorResult execute(ParseResult parseResult) {
-        InsertParseResult insertParseResult = (InsertParseResult) parseResult;
-        String tableName = insertParseResult.getTableName();
-        List<SQLExpr> columns = insertParseResult.getColumns();
-        List<Map<String, SQLExpr>> values = insertParseResult.getValues();
-        Requires.requireTrue(columns.size() == values.get(0).size(), "Column size and value size doesn't match");
-        TableDef tableDef = DefinitionCache.getTableDef(tableName);
-        int tableId = tableDef.getTableId();
-        List<TableDef> indexTableDefs = DefinitionCache.getIndexTableDefs(tableName);
+        long affected = 0;
+        MultiInsertParseResult multiInsertParseResult = (MultiInsertParseResult) parseResult;
+        for (InsertParseResult insertParseResult : multiInsertParseResult.getInsertParseResult()) {
+            String tableName = insertParseResult.getTableName();
+            List<SQLExpr> columns = insertParseResult.getColumns();
+            List<Map<String, SQLExpr>> values = insertParseResult.getValues();
+            Requires.requireTrue(columns.size() == values.get(0).size(), "Column size and value size doesn't match");
+            TableDef tableDef = DefinitionCache.getTableDef(tableName);
+            int tableId = tableDef.getTableId();
+            List<TableDef> indexTableDefs = DefinitionCache.getIndexTableDefs(tableName);
 
-        Map<String, String> map = new HashMap<>();
+            Map<String, String> map = new HashMap<>();
 
-        Map<String, Map<String, String>> indexMap = new HashMap<>();
-        //process each row
-        for (Map<String, SQLExpr> rowValueMap : values) {
-            JsonObject valueJson = new JsonObject();
-//            JsonObject keyJson = new JsonObject();
-            StringBuilder keyBuffer = new StringBuilder(String.valueOf(tableId));
-            populateRowValue(tableDef, rowValueMap, valueJson, keyBuffer, false);
-            String pk = keyBuffer.toString();
-            if(validateUK(pk)){
-                return getUKError();
-            }
-            map.put(pk, valueJson.toString());
+            Map<String, Map<String, String>> indexMap = new HashMap<>();
+            //process each row
+            for (Map<String, SQLExpr> rowValueMap : values) {
+                JsonObject valueJson = new JsonObject();
+                StringBuilder keyBuffer = new StringBuilder(String.valueOf(tableId));
+                populateRowValue(tableDef, rowValueMap, valueJson, keyBuffer, false);
+                String pk = keyBuffer.toString();
+                if (validateUK(pk)) {
+                    return getUKError();
+                }
+                map.put(pk, valueJson.toString());
 
-            for (TableDef idxDef : indexTableDefs) {
-                int indexId = idxDef.getTableId();
-                String indexName = idxDef.getTableName();
-                JsonObject indexJson = new JsonObject();
-                populateRowValue(idxDef, rowValueMap, indexJson, null, true);
-                if (indexMap.get(idxDef.getTableName()) != null) {
-                    indexMap.get(idxDef.getTableName()).put(indexJson.toString(), keyBuffer.toString());
-                } else {
-                    Map<String, String> indexVal = new HashMap<>();
-                    String keyPrefix = indexId+"_"+indexJson.toString();
-                    if(idxDef.isUnique()){
-                        if(validateUK(keyPrefix)){
-                            return getUKError();
+                for (TableDef idxDef : indexTableDefs) {
+                    int indexId = idxDef.getTableId();
+                    String indexName = idxDef.getTableName();
+                    JsonObject indexJson = new JsonObject();
+                    populateRowValue(idxDef, rowValueMap, indexJson, null, true);
+                    if (indexMap.get(idxDef.getTableName()) != null) {
+                        indexMap.get(idxDef.getTableName()).put(indexJson.toString(), keyBuffer.toString());
+                    } else {
+                        Map<String, String> indexVal = new HashMap<>();
+                        String keyPrefix = indexId + "_" + indexJson.toString();
+                        if (idxDef.isUnique()) {
+                            if (validateUK(keyPrefix)) {
+                                return getUKError();
+                            }
+                            indexVal.put(keyPrefix, keyBuffer.toString());
+                        } else {
+                            String key = keyPrefix + "_" + keyBuffer.toString();
+                            indexVal.put(key, null);
                         }
-                        indexVal.put(keyPrefix,keyBuffer.toString());
-                    }else{
-                        String key = keyPrefix+"_"+keyBuffer.toString();
-                        indexVal.put(key,null);
-                    }
 
-                    indexMap.put(indexName, indexVal);
+                        indexMap.put(indexName, indexVal);
+                    }
                 }
             }
-        }
+            kvClient.insertData(map);
+            for (Map.Entry<String, Map<String, String>> idxEntry : indexMap.entrySet()) {
+                kvClient.insertData(idxEntry.getValue());
+            }
+            affected++;
 
-        kvClient.insertData(map);
-        for (Map.Entry<String, Map<String, String>> idxEntry : indexMap.entrySet()) {
-            kvClient.insertData(idxEntry.getValue());
         }
+        OkPacket okPacket = new OkPacket();
+        okPacket.affectedRows=affected;
+        okPacket.packetId=1;
+        okPacket.message = "Insert successfully executed".getBytes();
         ByteBuf byteBuf = Unpooled.buffer();
-        byteBuf.writeBytes(OkPacket.OK);
+        okPacket.write(byteBuf);
         return ExecutorResult.builder().byteBuf(byteBuf).build();
     }
 
@@ -89,11 +97,11 @@ public class InsertPhysicalExecutor extends AbstractPhysicalExecutor {
         error.packetId = 1;
         error.errno = ErrorCode.ER_INSERT_INFO;
         error.message = "Duplicated record found".getBytes();
-        ByteBuf byteBuf =error.write();
+        ByteBuf byteBuf = error.write();
         return ExecutorResult.builder().byteBuf(byteBuf).build();
     }
 
-    private boolean validateUK(String key){
+    private boolean validateUK(String key) {
         return kvClient.containsKeyInDataNode(key);
     }
 
@@ -106,11 +114,11 @@ public class InsertPhysicalExecutor extends AbstractPhysicalExecutor {
                 constraintCheck(constraints, rowValue, keyBuffer);
             }
             if (rowValue instanceof SQLIntegerExpr) {
-                if(tableDef.getColumnDefMap().containsKey(rowEntry.getKey())){
+                if (tableDef.getColumnDefMap().containsKey(rowEntry.getKey())) {
                     valueJson.addProperty(columnName, ((SQLIntegerExpr) rowValue).getNumber());
                 }
             } else if (rowValue instanceof SQLCharExpr) {
-                if(tableDef.getColumnDefMap().containsKey(rowEntry.getKey())){
+                if (tableDef.getColumnDefMap().containsKey(rowEntry.getKey())) {
                     valueJson.addProperty(columnName, ((SQLCharExpr) rowValue).getText());
                 }
             } else {
@@ -121,7 +129,7 @@ public class InsertPhysicalExecutor extends AbstractPhysicalExecutor {
 
     @Override
     protected boolean compatible(ParseResult parseResult) {
-        return parseResult instanceof InsertParseResult;
+        return parseResult instanceof MultiInsertParseResult;
     }
 
     private void constraintCheck(List<ConstraintType> constraints, SQLExpr value, StringBuilder keyBuffer) {

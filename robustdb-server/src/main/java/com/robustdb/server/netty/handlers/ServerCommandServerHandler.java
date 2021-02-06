@@ -1,13 +1,14 @@
 package com.robustdb.server.netty.handlers;
 
 import com.robustdb.server.netty.biz.ServerQueryBizHandler;
+import com.robustdb.server.protocol.mysql.ErrorPacket;
 import com.robustdb.server.protocol.mysql.MySQLMessage;
 import com.robustdb.server.protocol.mysql.MySQLPacket;
 import com.robustdb.server.protocol.mysql.OkPacket;
 import com.robustdb.server.sql.MySqlEngine;
-import com.robustdb.server.sql.mycat.manager.SelectVariables;
 import com.robustdb.server.sql.mycat.manager.ManagerParse;
 import com.robustdb.server.sql.mycat.manager.ManageSelectHandler;
+import com.robustdb.server.util.ErrorCode;
 import com.robustdb.server.util.GlobalSqlUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -147,6 +148,12 @@ public class ServerCommandServerHandler extends ChannelInboundHandlerAdapter {
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
 
 		cause.printStackTrace();
+		ErrorPacket error = new ErrorPacket();
+		error.packetId = 1;
+		error.errno = ErrorCode.ERR_READ;
+		error.message = ("Unexpected issue happened:"+cause.getMessage()).getBytes();
+		ByteBuf buf = error.write();
+		ctx.writeAndFlush(buf);
 		ctx.close();
 	}
 

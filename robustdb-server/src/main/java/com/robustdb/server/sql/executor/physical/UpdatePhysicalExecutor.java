@@ -1,6 +1,5 @@
 package com.robustdb.server.sql.executor.physical;
 
-import com.robustdb.server.model.parser.CreateParseResult;
 import com.robustdb.server.model.parser.ParseResult;
 import com.robustdb.server.model.parser.UpdateParseResult;
 import com.robustdb.server.sql.executor.ExecutorResult;

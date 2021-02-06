@@ -6,3 +6,4 @@ INSERT into Persons(PersonID,LastName,FirstName,Address,City) values (1,'Guo','J
 
 SELECT LastName, FirstName, Address, City FROM Persons a where City='Shanghai';
 
+update Persons set Address='Dahua' where PersonID=1;

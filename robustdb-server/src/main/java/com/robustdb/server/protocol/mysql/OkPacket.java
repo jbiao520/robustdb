@@ -65,35 +65,22 @@ public class OkPacket extends MySQLPacket {
         }
     }
 
-//    public byte[] writeToBytes() {
-//        ByteBuffer buffer = c.allocate();
-//        this.write(buffer, c);
-//        buffer.flip();
-//        byte[] data = new byte[buffer.limit()];
-//        buffer.get(data);
-//        c.recycle(buffer);
-//        return data;
-//    }
+    public void write(ByteBuf buffer) {
 
-//    private ByteBuffer write(ByteBuffer buffer, FrontendConnection c) {
-//
-//        int size = calcPacketSize();
-//        buffer = c.checkWriteBuffer(buffer, c.getPacketHeaderSize() + size,
-//                true);
-//        BufferUtil.writeUB3(buffer, calcPacketSize());
-//        buffer.put(packetId);
-//        buffer.put(fieldCount);
-//        BufferUtil.writeLength(buffer, affectedRows);
-//        BufferUtil.writeLength(buffer, insertId);
-//        BufferUtil.writeUB2(buffer, serverStatus);
-//        BufferUtil.writeUB2(buffer, warningCount);
-//        if (message != null) {
-//            BufferUtil.writeWithLength(buffer, message);
-//        }
-//
-//        return buffer;
-//
-//    }
+        int size = calcPacketSize();
+        BufferUtil.writeUB3(buffer, calcPacketSize());
+        buffer.writeByte(packetId);
+        buffer.writeByte(fieldCount);
+        BufferUtil.writeLength(buffer, affectedRows);
+        BufferUtil.writeLength(buffer, insertId);
+        BufferUtil.writeUB2(buffer, serverStatus);
+        BufferUtil.writeUB2(buffer, warningCount);
+        if (message != null) {
+            BufferUtil.writeWithLength(buffer, message);
+        }
+
+
+    }
 
 //    public void write(FrontendConnection c) {
 //        ByteBuffer buffer = write(c.allocate(), c);
