@@ -14,6 +14,7 @@ import java.util.Map;
 public class TableDef {
     private String rawTableDef;
     private String tableName;
+    private ColumnDef primaryKeyDef;
     private String primaryKey;
 //    private List<ColumnDef> columnDefList;
     private Map<String, ColumnDef> columnDefMap;

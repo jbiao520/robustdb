@@ -58,6 +58,7 @@ public class CreatePhysicalExecutor extends AbstractPhysicalExecutor{
                 .rawTableDef(rawReq)
                 .columnDefMap(columnDefMap)
                 .primaryKey(pk)
+                .primaryKeyDef(columnDefMap.get(pk))
                 .isIndexTable(false)
                 .tableId(tableId)
                 .build();

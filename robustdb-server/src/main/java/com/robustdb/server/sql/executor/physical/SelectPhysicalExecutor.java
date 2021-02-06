@@ -49,10 +49,15 @@ public class SelectPhysicalExecutor extends AbstractPhysicalExecutor {
 
             }
 
-            TableDef indexTableDef = analyzeQueryPlan(parallelOps, tableName);
+            TableDef indexTableDef = analyzeQueryPlan(parallelOps, tableName, tableDef);
             List<JsonObject> jsonObjectList = null;
             if (indexTableDef != null) {
-                jsonObjectList = queryOnIndex(tableDef, queryCondition, indexTableDef);
+                if (indexTableDef.isIndexTable()) {
+                    jsonObjectList = queryOnIndex(queryCondition, indexTableDef);
+                } else {
+                    jsonObjectList = queryOnPK(queryCondition, indexTableDef);
+                }
+
             } else {
                 jsonObjectList = fulltableScan(tableDef, queryCondition);
             }
@@ -114,9 +119,22 @@ public class SelectPhysicalExecutor extends AbstractPhysicalExecutor {
         return ExecutorResult.builder().byteBuf(buffer).build();
     }
 
-    private List<JsonObject> queryOnIndex(TableDef tableDef, Map<String, String> queryCondition, TableDef indexTableDef) {
+    private List<JsonObject> queryOnPK(Map<String, String> queryCondition, TableDef tableDef) {
         List<JsonObject> jsonObjectList = new ArrayList<>();
         int tableId = tableDef.getTableId();
+        String keyHint = tableId + "_" + queryCondition.get(tableDef.getPrimaryKey());
+        byte[] value = kvClient.getDataNodeData(keyHint);
+        if (value != null) {
+            String valueJson = new String(value);
+            JsonObject jsonObject = gson.fromJson(valueJson, JsonObject.class);
+            jsonObjectList.add(jsonObject);
+        }
+        return jsonObjectList;
+    }
+
+
+    private List<JsonObject> queryOnIndex(Map<String, String> queryCondition, TableDef indexTableDef) {
+        List<JsonObject> jsonObjectList = new ArrayList<>();
         int indexId = indexTableDef.getTableId();
         JsonObject indexJson = new JsonObject();
         for (String s : indexTableDef.getColumnDefMap().keySet()) {
@@ -165,7 +183,7 @@ public class SelectPhysicalExecutor extends AbstractPhysicalExecutor {
         }
     }
 
-    private TableDef analyzeQueryPlan(List<SQLBinaryOpExpr> parallelOps, String tableName) {
+    private TableDef analyzeQueryPlan(List<SQLBinaryOpExpr> parallelOps, String tableName, TableDef originalTableDef) {
         List<TableDef> tableDefs = DefinitionCache.getIndexTableDefs(tableName);
         Set<String> whereCols = new HashSet<>();
         for (SQLBinaryOpExpr parallelOp : parallelOps) {
@@ -174,6 +192,10 @@ public class SelectPhysicalExecutor extends AbstractPhysicalExecutor {
 //            SQLIdentifierExpr right = (SQLIdentifierExpr) parallelOp.getRight();
             String columnName = left.getName();
             whereCols.add(columnName);
+        }
+        if (whereCols.contains(originalTableDef.getPrimaryKey())) {
+            //pk found
+            return originalTableDef;
         }
         for (TableDef tableDef : tableDefs) {
             for (String idxColName : tableDef.getColumnDefMap().keySet()) {

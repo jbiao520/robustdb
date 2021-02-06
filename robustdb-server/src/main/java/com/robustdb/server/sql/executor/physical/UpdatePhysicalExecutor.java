@@ -8,6 +8,7 @@ public class UpdatePhysicalExecutor extends AbstractPhysicalExecutor{
 
     @Override
     protected ExecutorResult execute(ParseResult parseResult) {
+        UpdateParseResult result = (UpdateParseResult) parseResult;
         return null;
     }
 
